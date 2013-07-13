@@ -1,6 +1,6 @@
-# grunt-angular-modularize
+# grunt-angular-service
 
-> Convert Javascript libraries to AngularJS modules.
+> Generate AngularJS services from JavaScript libraries.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.1`
@@ -8,23 +8,23 @@ This plugin requires Grunt `~0.4.1`
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install grunt-angular-modularize --save-dev
+npm install grunt-angular-service --save-dev
 ```
 
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks('grunt-angular-modularize');
+grunt.loadNpmTasks('grunt-angular-service');
 ```
 
-## The "angular_modularize" task
+## The "ngservice" task
 
 ### Overview
-In your project's Gruntfile, add a section named `angular_modularize` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `ngservice` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  angular_modularize: {
+  ngservice: {
     options: {
       // Task-specific options go here.
     },
@@ -56,7 +56,7 @@ In this example, the default options are used to do something with whatever. So 
 
 ```js
 grunt.initConfig({
-  angular_modularize: {
+  ngservice: {
     options: {},
     files: {
       'dest/default_options': ['src/testing', 'src/123'],
@@ -70,7 +70,7 @@ In this example, custom options are used to do something else with whatever else
 
 ```js
 grunt.initConfig({
-  angular_modularize: {
+  ngservice: {
     options: {
       separator: ': ',
       punctuation: ' !!!',

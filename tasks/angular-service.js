@@ -1,6 +1,6 @@
 /*
- * grunt-angular-modularize
- * https://github.com/obibring/grunt-angular-modularize
+ * grunt-angular-service
+ * https://github.com/obibring/grunt-angular-service
  *
  * Copyright (c) 2013 Orr Bibring
  * Licensed under the MIT license.
@@ -11,28 +11,27 @@
  * 2. Check if libraries interact with global namespace (warn / throw).
  * 3.
  */
-
 'use strict';
 var _ = require('underscore');
 
-// Template that wraps libraries in angular factory definition.
-var template = _.template("(function(angular) {\n"+
-  "  angular.module('<%= module %>')\n\t" +
-  "    .factory('<%= factory %>', function() {\n\t\t" +
-  "      function temp() {\n\t\t\t" +
-  "        <%= src %>\n\t\t\t" +
-  "      }\n\t\t" +
-  "      var lib = new temp();\n" +
-  "      var properties = [];\n" +
-  "      for (var key in lib) { \n" +
-  "        if (lib.hasOwnProperty(key)) properties.push(key);\n" +
-  "      }\n" +
-  "      if (properties.length === 1) {\n" +
-  "        return lib[properties.pop()];\n" +
-  "       } else {\n" +
-  "         return lib;\n" +
+// Template that wraps JavaScript in angular factory definition.
+var template = _.template("(function(angular) {"+
+  "  angular.module('<%= module %>')" +
+  "    .factory('<%= factory %>', function() {" +
+  "      function temp() {" +
+  "        <%= src %>" +
+  "      }" +
+  "      var lib = new temp();" +
+  "      var properties = [];" +
+  "      for (var key in lib) { " +
+  "        if (lib.hasOwnProperty(key)) properties.push(key);" +
+  "      }" +
+  "      if (properties.length === 1) {" +
+  "        return lib[properties.pop()];" +
+  "       } else {" +
+  "         return lib;" +
   "       } " +
-  "     });\n" +
+  "     });" +
   "  })(window.angular);");
 
 module.exports = function(grunt) {
@@ -41,13 +40,12 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask(
-    'angular_modularize',
-    'Convert Javascript libraries to AngularJS modules', function() {
+  grunt.registerMultiTask('ngservice',
+    'Generate AngularJS services from JavaScript libraries', function() {
 
         var warn = function (message) {
           grunt.log.warn(this.name + ": " + message);
-        };
+        }.bind(this);
 
         var log = function (message) {
           grunt.log.writeln(this.name + ": " + message);
@@ -70,7 +68,6 @@ module.exports = function(grunt) {
 
       // Iterate over all specified file groups.
       this.files.forEach(function(f) {
-        // Concat specified files.
         var src = f.src.filter(function(filepath) {
           // Warn on and remove invalid source files (if nonull was set).
           if (!grunt.file.exists(filepath)) {
@@ -83,14 +80,14 @@ module.exports = function(grunt) {
           // Read file source.
           return grunt.file.read(filepath);
         }).forEach(function(srcString) {
-          var angularized = template({
+          var service = template({
             src: srcString,
             module: module,
             factory: factory
           });
 
           // Write the destination file.
-          grunt.file.write(f.dest, angularized);
+          grunt.file.write(f.dest, service);
 
           // Print a success message.
           log('File "' + f.dest + '" created.');
