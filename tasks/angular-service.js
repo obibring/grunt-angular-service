@@ -14,25 +14,62 @@
 'use strict';
 var _ = require('underscore');
 
+var quoteWrap = function (dep) {
+  // Wrap dependency in quotes.
+  return "'" + dep + "'";
+};
+
 // Template that wraps JavaScript in angular factory definition.
-var template = _.template("(function(angular) {"+
-  "  angular.module('<%= module %>')" +
-  "    .factory('<%= factory %>', function() {" +
-  "      function temp() {" +
-  "        <%= src %>" +
-  "      }" +
-  "      var lib = new temp();" +
-  "      var properties = [];" +
-  "      for (var key in lib) { " +
-  "        if (lib.hasOwnProperty(key)) properties.push(key);" +
-  "      }" +
-  "      if (properties.length === 1) {" +
-  "        return lib[properties.pop()];" +
-  "       } else {" +
-  "         return lib;" +
-  "       } " +
-  "     });" +
-  "  })(window.angular);");
+//
+var makeTemplate = function(define, dependencies) {
+
+  var deps = dependencies || [];
+  var defineStr = define ? ', [' + deps.map(quoteWrap).join(', ') + ']' : '';
+  var srvcStr = deps.length ? deps.map(quoteWrap).join(', ') + ', ' : '';
+
+  var template =
+    "(function(angular) {"+
+    "  angular.module('<%= module %>'" + defineStr +  ")" +
+    "    .factory('<%= service %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
+    "      function temp() {" +
+    "        <%= src %>" +
+    "      }";
+
+  // Above, `src` may have dependencies. Thus, prior to executing `temp`
+  // create an execution context injected with these dependencies.
+  template += " var context = {}; ";
+
+  // Keep track of which dependencies were injected into `context`.
+  template += " var injected = {}; ";
+
+  deps.forEach(function(dep){
+    template += "context['" + dep + "'] = " + dep + ";";
+    template += "injected['" + dep + "'] = true;";
+  });
+
+  template +=
+    "      temp.call(context);" +
+    // Iterate over properties of `context`, comparing each property to the
+    // properties injected above. If only a single property exists that
+    // wasn't injected, this sole property is returned.
+    "      var addedProps = [];" +
+    "      for (var prop in context) { " +
+    "        if (context.hasOwnProperty(prop) && !injected.hasOwnProperty(prop)) { " +
+    "           addedProps.push(prop);" +
+    "        } " +
+    "      }" +
+    "      if (addedProps.length === 1) {" +
+    "        return context[addedProps.pop()];" +
+    "       } else {" +
+    // `src` added more than a single property into `context`. Make no
+    // assumptions and return the entire `context` object.
+    "         return context;" +
+    "       } " +
+    "     }]);" +
+    "  })(window.angular);";
+
+  return template;
+};
 
 module.exports = function(grunt) {
 
@@ -51,20 +88,33 @@ module.exports = function(grunt) {
           grunt.log.writeln(this.name + ": " + message);
         }.bind(this);
 
-      // Merge task-specific and/or target-specific options with these defaults.
-      var options = this.options({
-        punctuation: '.',
-        separator: ', '
-      });
+        var fatal = function (message) {
+          grunt.fatal(this.name + ": " + message);
+        }.bind(this);
 
-      // Must provide name of angular module to be created.
-      //this.requiresConfig(this.name+'.module');
-      //this.requiresConfig(this.name+'.factory');
+      var data = this.data;
 
-      var module = this.data.module;
-      var factory = this.data.factory;
+      // Determine validity of `module` option.
+      if (!_.has(data, 'module') || !_.isString(data.module)) {
+        fatal('Invalid `module` option.');
+      }
 
-      console.log(this.files);
+      // Determine validity of `service` option.
+      if (!_.has(data, 'service') || !_.isString(data.service)) {
+        fatal('Invalid `service` option.');
+      }
+
+      // Determine validity of `define` option.
+      if (_.has(data, 'define') && !_.isBoolean(data.define)) {
+        fatal('Invalid `define` option.');
+      }
+
+      var module  = data.module;                  // Name of module to be written.
+      var dependencies = data.dependencies || []; // Service dependencies.
+      var define  = data.define || false;         // Whether to define the module.
+      var service = data.service;                 // Name of service to be written.
+
+      var sources = [];
 
       // Iterate over all specified file groups.
       this.files.forEach(function(f) {
@@ -80,18 +130,25 @@ module.exports = function(grunt) {
           // Read file source.
           return grunt.file.read(filepath);
         }).forEach(function(srcString) {
-          var service = template({
-            src: srcString,
-            module: module,
-            factory: factory
-          });
-
-          // Write the destination file.
-          grunt.file.write(f.dest, service);
-
-          // Print a success message.
-          log('File "' + f.dest + '" created.');
+          sources.push(srcString);
         });
+
+        // If sources is empty, die.
+        if (sources.length < 1) {
+          fatal('No source files provided.');
+        }
+
+        var template = makeTemplate(define, dependencies);
+
+        // Write the destination file.
+        grunt.file.write(f.dest, _.template(template, {
+          src: sources.join("\n"),
+          module: module,
+          service: service
+        }));
+
+        // Print a success message.
+        log('File "' + f.dest + '" created.');
 
     });
   });
