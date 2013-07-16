@@ -37,17 +37,20 @@ grunt.initConfig({
 
 ### Options
 
-#### options.separator
+#### module
 Type: `String`
-Default value: `',  '`
 
-A string value that is used to do something with whatever.
+The name of the module into which the service is defined.
 
-#### options.punctuation
+#### service
 Type: `String`
-Default value: `'.'`
 
-A string value that is used to do something else with whatever else.
+The name of the service to be added to the module.
+
+#### define
+Type: `Boolean` Default Value: ```false```
+
+A boolean value indicating whether to define the module.
 
 ### Usage Examples
 
@@ -57,9 +60,10 @@ In this example, the default options are used to do something with whatever. So 
 ```js
 grunt.initConfig({
   ngservice: {
-    options: {},
+    module: "somePrededinedModule",
+    service: "MyLibrary",
     files: {
-      'dest/default_options': ['src/testing', 'src/123'],
+      'dest/angularized_library.js': 'library.js',
     },
   },
 })
@@ -71,12 +75,11 @@ In this example, custom options are used to do something else with whatever else
 ```js
 grunt.initConfig({
   ngservice: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
+    module: 'someNewModule',
+    define: true,
+    service: 'someServiceAddedToNewModule',
     files: {
-      'dest/default_options': ['src/testing', 'src/123'],
+      'dest/angularized_library.js': 'library.js',
     },
   },
 })
