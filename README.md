@@ -25,12 +25,12 @@ In your project's Gruntfile, add a section named `ngservice` to the data object 
 ```js
 grunt.initConfig({
   ngservice: {
-    options: {
-      // Task-specific options go here.
-    },
+    service: 'someService',
+    module: 'someModule',
+    define: false,
     your_target: {
       // Target-specific file lists and/or options go here.
-    },
+    }
   },
 })
 ```
