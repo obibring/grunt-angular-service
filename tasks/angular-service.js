@@ -60,12 +60,12 @@ var makeTemplate = function(define, dependencies) {
     "      }" +
     "      if (addedProps.length === 1) {" +
     "        return context[addedProps.pop()];" +
-    "       } else {" +
+    "      } else {" +
     // `src` added more than a single property into `context`. Make no
     // assumptions and return the entire `context` object.
-    "         return context;" +
-    "       } " +
-    "     }]);" +
+    "        return context;" +
+    "      } " +
+    "    }]);" +
     "  })(window.angular);";
 
   return template;
