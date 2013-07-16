@@ -28,60 +28,73 @@ grunt.initConfig({
     service: 'someService',
     module: 'someModule',
     define: false,
-    your_target: {
-      // Target-specific file lists and/or options go here.
+    files: {
+        'angularized_library.js': 'library.js'
     }
   },
 })
 ```
 
-### Options
+### Settings
 
 #### module
 Type: `String`
 
-The name of the module into which the service is defined.
+The name of the module the service is added to.
 
 #### service
 Type: `String`
 
-The name of the service to be added to the module.
+The name of the service being created (the first argument passed to the ```factory``` method).
 
 #### define
 Type: `Boolean` Default Value: ```false```
 
-A boolean value indicating whether to define the module.
+Whether to define the module by passing a dependency argument to ```angular.module```. eg: ```angular.module('myModule, [])```.
+
+#### dependencies
+Type: ```Array``` Default Value: ```null```
+
+A list of dependencies passed to the ```factory``` method and available to wrapped libraries via ```this```.
 
 ### Usage Examples
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
-
+#### Generate a Angular Service from an Existing JavaScript Library
+In this example, underscore.js is wrapped as an angular service.
 ```js
 grunt.initConfig({
   ngservice: {
-    module: "somePrededinedModule",
-    service: "MyLibrary",
+    module: "myMdule",
+    service: "_",
     files: {
-      'dest/angularized_library.js': 'library.js',
+      'services/underscore_service.js': 'path/to/underscore.js',
     },
   },
 })
 ```
 
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+#### Generate a Service From an Existing JavaScript Library that has Dependencies
+In this somewhat contrived example, underscore.js and Backbone.js are both converted to angular services, with the former provided as a dependency to the latter.
 
 ```js
 grunt.initConfig({
   ngservice: {
-    module: 'someNewModule',
-    define: true,
-    service: 'someServiceAddedToNewModule',
-    files: {
-      'dest/angularized_library.js': 'library.js',
+    underscore: {
+      module: 'myModule',
+      service: '_',
+      files: {
+        'services/underscore_service.js': 'path/to/underscore.js',
+      }
     },
-  },
+    backbone: {
+      module: 'myModule',
+      service: 'Backbone',
+      dependencies: ['_'],
+      files: {
+        'services/backbone_service.js': 'path/to/backbone.js',
+      }
+    }
+  }
 })
 ```
 
