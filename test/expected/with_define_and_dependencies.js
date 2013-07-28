@@ -1,6 +1,15 @@
 (function(angular) {
+  var isEmpty = function (obj) {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        return false;
+      }
+    }
+    return true;
+  };
   angular.module('testModule', ['dep1', 'dep2'])
     .factory('testService', ['dep1', 'dep2', function(dep1, dep2) {
+      var module = {exports: {}}, exports = module.exports;
       function temp() {
         (function(root){
           root.myExportedLib = function(){ return 'hello world'; };
@@ -21,6 +30,8 @@
       }
       if (addedProps.length === 1) {
         return context[addedProps.pop()];
+      } else if (!isEmpty(exports)) {
+        return exports;
       } else {
         return context;
       }

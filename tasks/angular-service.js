@@ -38,8 +38,17 @@ var makeTemplate = function(define, dependencies, choose) {
 
   var template =
     "(function(angular) {"+
+    "  var isEmpty = function (obj) { " +
+    "    for (var prop in obj) { " +
+    "      if (obj.hasOwnProperty(prop)) { " +
+    "        return false; " +
+    "      } " +
+    "    } " +
+    "    return true; " +
+    "  }; " +
     "  angular.module('<%= module %>'" + defineStr +  ")" +
     "    .factory('<%= service %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
+    "      var module = {exports: {}}, exports = module.exports; " +
     "      function temp() {" +
     "        <%= src %>" +
     "      }";
@@ -58,9 +67,7 @@ var makeTemplate = function(define, dependencies, choose) {
 
   template +=
     "      temp.call(context);" +
-    // Iterate over properties of `context`, comparing each property to the
-    // properties injected above. If only a single property exists that
-    // wasn't injected, this sole property is returned.
+    // Export Strategy #1: Check if only a single property was added onto `context`.
     "      var addedProps = [];" +
     "      for (var prop in context) { " +
     "        if (context.hasOwnProperty(prop) && !injected.hasOwnProperty(prop)) { " +
@@ -75,6 +82,16 @@ var makeTemplate = function(define, dependencies, choose) {
     "        return context['" + choose + "']; ";
   }
   template +=
+    // Export Strategy #2: Check for node style exports.
+    "      } else if (!isEmpty(exports)) { ";
+  if (choose) {
+    template +=
+    "       if (exports['" + choose + "'] !== undefined) { " +
+    "         return exports['" + choose + "']; " +
+    "       } ";
+  }
+  template +=
+    "       return exports; " +
     "      } else {" +
     // `src` added more than a single property into `context`. Make no
     // assumptions and return the entire `context` object.
