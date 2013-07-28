@@ -45,6 +45,14 @@ module.exports = function(grunt) {
           'tmp/with_define': ['test/fixtures/my-lib.js']
         }
       },
+      with_choose: {
+        module: 'testModule',
+        service: 'testService',
+        choose: 'chosen',
+        files: {
+          'tmp/with_choose': ['test/fixtures/my-lib.js']
+        }
+      },
       with_dependencies: {
         module: 'testModule',
         service: 'testService',

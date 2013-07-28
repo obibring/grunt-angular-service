@@ -55,12 +55,23 @@ exports.angular_modularize = {
     test.done();
 
   },
+  with_choose: function(test) {
+    test.expect(1);
+
+    var actual = grunt.file.read('tmp/with_choose');
+    var expected = grunt.file.read('test/expected/with_choose.js');
+    test.equal(
+      removeWhitespace(actual),
+      removeWhitespace(expected),
+      'should create a service from a single chosen property.');
+
+    test.done();
+
+  },
   with_dependencies: function(test) {
     test.expect(1);
     var actual = grunt.file.read('tmp/with_dependencies');
     var expected = grunt.file.read('test/expected/with_dependencies.js');
-    console.log("The lenght of first is: " + removeWhitespace(actual).length + "\n\n");
-    console.log("The lenght of second  is: " + removeWhitespace(expected).length + "\n\n");
     test.equal(
       removeWhitespace(actual),
       removeWhitespace(expected),

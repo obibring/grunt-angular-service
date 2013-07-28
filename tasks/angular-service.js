@@ -21,7 +21,16 @@ var quoteWrap = function (dep) {
 
 // Template that wraps JavaScript in angular factory definition.
 //
-var makeTemplate = function(define, dependencies) {
+// @param define Boolean Whether to define a new module when creating
+//    the service.
+// @param dependencies Array An array of dppendencies injected
+//    into the context of the library.
+// @param choose String For libraries that export more than a single
+//    property on their execution contexts, use this argument to
+//    indicate which of the exported properties should be chosen
+//    as the return value for the service.
+//
+var makeTemplate = function(define, dependencies, choose) {
 
   var deps = dependencies || [];
   var defineStr = define ? ', [' + deps.map(quoteWrap).join(', ') + ']' : '';
@@ -59,7 +68,13 @@ var makeTemplate = function(define, dependencies) {
     "        } " +
     "      }" +
     "      if (addedProps.length === 1) {" +
-    "        return context[addedProps.pop()];" +
+    "        return context[addedProps.pop()];";
+  if (choose) {
+    template +=
+    "      } else if (context['" + choose + "'] !== undefined) { " +
+    "        return context['" + choose + "']; ";
+  }
+  template +=
     "      } else {" +
     // `src` added more than a single property into `context`. Make no
     // assumptions and return the entire `context` object.
@@ -113,6 +128,7 @@ module.exports = function(grunt) {
       var dependencies = data.dependencies || []; // Service dependencies.
       var define  = data.define || false;         // Whether to define the module.
       var service = data.service;                 // Name of service to be written.
+      var choose = data.choose;
 
       var sources = [];
 
@@ -138,7 +154,7 @@ module.exports = function(grunt) {
           fatal('No source files provided.');
         }
 
-        var template = makeTemplate(define, dependencies);
+        var template = makeTemplate(define, dependencies, choose);
 
         // Write the destination file.
         grunt.file.write(f.dest, _.template(template, {

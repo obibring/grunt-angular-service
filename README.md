@@ -52,6 +52,13 @@ Type: `Boolean` Default Value: ```false```
 
 Whether to define the module by passing a dependency argument to ```angular.module```. eg: ```angular.module('myModule, [])```.
 
+#### choose
+Type: `String`
+
+Declare a specific property to export. Use this if your library exports multiple properties
+and you're only interested in one of them.
+
+
 #### dependencies
 Type: ```Array``` Default Value: ```null```
 
