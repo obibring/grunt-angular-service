@@ -14,7 +14,7 @@
         (function(root){
           root.myExportedLib = function(){ return 'hello world'; };
         })(this);
-      }
+      };
       var context = {};
       var injected = {};
       context['dep1'] = dep1;

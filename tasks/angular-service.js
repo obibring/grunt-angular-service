@@ -51,7 +51,7 @@ var makeTemplate = function(define, dependencies, choose) {
     "      var module = {exports: {}}, exports = module.exports; " +
     "      var temp = function() {" +
     "        <%= src %>" +
-    "      }";
+    "      };";
 
   // Above, `src` may have dependencies. Thus, prior to executing `temp`
   // create an execution context injected with these dependencies.
