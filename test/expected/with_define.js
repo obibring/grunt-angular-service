@@ -10,7 +10,7 @@
   angular.module('testModule', [])
     .factory('testService', [function() {
       var module = {exports: {}}, exports = module.exports;
-      function temp() {
+      var temp = function() {
         (function(root){
           root.myExportedLib = function(){ return 'hello world'; };
         })(this);

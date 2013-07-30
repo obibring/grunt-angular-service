@@ -49,7 +49,7 @@ var makeTemplate = function(define, dependencies, choose) {
     "  angular.module('<%= module %>'" + defineStr +  ")" +
     "    .factory('<%= service %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
     "      var module = {exports: {}}, exports = module.exports; " +
-    "      function temp() {" +
+    "      var temp = function() {" +
     "        <%= src %>" +
     "      }";
 
