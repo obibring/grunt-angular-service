@@ -87,7 +87,7 @@ A list of dependencies passed to the ```factory``` method and available to wrapp
 ### Usage Examples
 
 #### Generate a Angular Service from an Existing JavaScript Library
-In this example, underscore.js is wrapped as an angular service.
+In this example, underscore.js is ported to an angular service.
 ```js
 grunt.initConfig({
   ngservice: {
