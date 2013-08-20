@@ -91,7 +91,7 @@ In this example, underscore.js is ported to an angular service.
 ```js
 grunt.initConfig({
   ngservice: {
-    module: "myMdule",
+    module: "myModule",
     service: "_",
     files: {
       'services/underscore_service.js': 'path/to/underscore.js',
