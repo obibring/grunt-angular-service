@@ -1,17 +1,22 @@
 # grunt-angular-service
+> Converts your favorite libraries to AngularJS services!
 
-> Generate AngularJS services from JavaScript libraries.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.1`
 
-If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
+If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out
+the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how
+to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use
+Grunt plugins. Once you're familiar with that process, you may install this plugin
+with this command:
 
 ```shell
 npm install grunt-angular-service --save-dev
 ```
 
-Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
+Once the plugin has been installed, it may be enabled inside your Gruntfile with this
+line of JavaScript:
 
 ```js
 grunt.loadNpmTasks('grunt-angular-service');
@@ -19,17 +24,32 @@ grunt.loadNpmTasks('grunt-angular-service');
 
 ## The "ngservice" task
 
+
+#### How it works
+Within angular's facotry method, ngservice task wraps your library in a function and invokes the function using a special
+context. This context is an object injected with dependencies you declare in the
+```dependencies``` option. Once the function is invoked, ngservice determines the return
+value of
+the
+API your library exposed, and returns
+
+
+The value returned by the ```factory``` function is determined as follows:
+
+  1. If the wrapped file adds a single property onto its execution context (```this```), that
+  value is the return value of the ```factory``` function.
+
 ### Overview
 In your project's Gruntfile, add a section named `ngservice` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
   ngservice: {
-    service: 'someService',
-    module: 'someModule',
-    define: false,
+    service: 'myLibAsService',
+    module: 'myLibModule',
+    define: true,
     files: {
-        'angularized_library.js': 'library.js'
+        'my_library_as_angular_service.js': 'my_library.js'
     }
   },
 })
@@ -50,7 +70,7 @@ The name of the service being created (the first argument passed to the ```facto
 #### define
 Type: `Boolean` Default Value: ```false```
 
-Whether to define the module by passing a dependency argument to ```angular.module```. eg: ```angular.module('myModule, [])```.
+Whether to define the module onto which the service is declared.
 
 #### choose
 Type: `String`
