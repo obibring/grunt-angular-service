@@ -63,20 +63,20 @@ angular.module('myLibModule', []).factory('myLibAsService', function() {
 
 ### Settings
 
+#### name
+Type: `String`
+
+The name of the service being created.
+
 #### module
 Type: `String`
 
 The name of the module to which the service is added.
 
-#### service
-Type: `String`
-
-The name of the service being created.
-
 #### defineModule
 Type: `Boolean` Default Value: ```false```
 
-Whether to define the module onto which the service is declared.
+Whether to define the module.
 
 #### choose
 Type: `String`
@@ -84,11 +84,10 @@ Type: `String`
 Declare a specific property to export. Use this if your library exports multiple properties
 and you're only interested in one of them.
 
-
 #### dependencies
 Type: ```Array``` Default Value: ```null```
 
-A list of dependencies passed to the ```factory``` method and available to wrapped libraries via ```this```.
+A list of dependencies made available to libraries via ```this```.
 
 ### Usage Examples
 

@@ -35,22 +35,22 @@ module.exports = function(grunt) {
     ngservice: {
       default_options: {
         module: 'testModule',
-        service: 'testService',
+        name: 'testService',
         files: {
           'tmp/default_options': ['test/fixtures/my-lib.js']
         }
       },
       with_define: {
         module: 'testModule',
-        service: 'testService',
-        define: true,
+        name: 'testService',
+        defineModule: true,
         files: {
           'tmp/with_define': ['test/fixtures/my-lib.js']
         }
       },
       with_choose: {
         module: 'testModule',
-        service: 'testService',
+        name: 'testService',
         choose: 'chosen',
         files: {
           'tmp/with_choose': ['test/fixtures/my-lib.js']
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
       },
       with_dependencies: {
         module: 'testModule',
-        service: 'testService',
+        name: 'testService',
         dependencies: ['dep1', 'dep2'],
         files: {
           'tmp/with_dependencies': ['test/fixtures/my-lib.js']
@@ -66,8 +66,8 @@ module.exports = function(grunt) {
       },
       with_define_and_dependencies: {
         module: 'testModule',
-        service: 'testService',
-        define: true,
+        name: 'testService',
+        defineModule: true,
         dependencies: ['dep1', 'dep2'],
         files: {
           'tmp/with_define_and_dependencies': ['test/fixtures/my-lib.js']

@@ -21,7 +21,7 @@ var quoteWrap = function (dep) {
 
 // Template that wraps JavaScript in angular factory definition.
 //
-// @param define Boolean Whether to define a new module when creating
+// @param defineModule Boolean Whether to define a new module when creating
 //    the service.
 // @param dependencies Array An array of dppendencies injected
 //    into the context of the library.
@@ -30,10 +30,10 @@ var quoteWrap = function (dep) {
 //    indicate which of the exported properties should be chosen
 //    as the return value for the service.
 //
-var makeTemplate = function(define, dependencies, choose) {
+var makeTemplate = function(defineModule, dependencies, choose) {
 
   var deps = dependencies || [];
-  var defineStr = define ? ', [' + deps.map(quoteWrap).join(', ') + ']' : '';
+  var defineStr = defineModule ? ', [' + deps.map(quoteWrap).join(', ') + ']' : '';
   var srvcStr = deps.length ? deps.map(quoteWrap).join(', ') + ', ' : '';
 
   var template =
@@ -47,7 +47,7 @@ var makeTemplate = function(define, dependencies, choose) {
     "    return true; " +
     "  }; " +
     "  angular.module('<%= module %>'" + defineStr +  ")" +
-    "    .factory('<%= service %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
+    "    .factory('<%= name %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
     "      var module = {exports: {}}, exports = module.exports; " +
     "      var temp = function() {" +
     "        <%= src %>" +
@@ -131,20 +131,20 @@ module.exports = function(grunt) {
         fatal('Invalid `module` option.');
       }
 
-      // Determine validity of `service` option.
-      if (!_.has(data, 'service') || !_.isString(data.service)) {
-        fatal('Invalid `service` option.');
+      // Determine validity of `name` option.
+      if (!_.has(data, 'name') || !_.isString(data.name)) {
+        fatal('Invalid `name` option.');
       }
 
-      // Determine validity of `define` option.
-      if (_.has(data, 'define') && !_.isBoolean(data.define)) {
-        fatal('Invalid `define` option.');
+      // Determine validity of `defineModule` option.
+      if (_.has(data, 'defineModule') && !_.isBoolean(data.defineModule)) {
+        fatal('Invalid `defineModule` option.');
       }
 
-      var module  = data.module;                  // Name of module to be written.
-      var dependencies = data.dependencies || []; // Service dependencies.
-      var define  = data.define || false;         // Whether to define the module.
-      var service = data.service;                 // Name of service to be written.
+      var module = data.module;                       // Name of module.
+      var defineModule = data.defineModule || false;  // Define the module?
+      var dependencies = data.dependencies || [];     // Service dependencies.
+      var name = data.name;                           // Name of service.
       var choose = data.choose;
 
       var sources = [];
@@ -171,13 +171,13 @@ module.exports = function(grunt) {
           fatal('No source files provided.');
         }
 
-        var template = makeTemplate(define, dependencies, choose);
+        var template = makeTemplate(defineModule, dependencies, choose);
 
         // Write the destination file.
         grunt.file.write(f.dest, _.template(template, {
           src: sources.join("\n"),
           module: module,
-          service: service
+          name: name
         }));
 
         // Print a success message.
