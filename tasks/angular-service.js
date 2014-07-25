@@ -6,99 +6,206 @@
  * Licensed under the MIT license.
  */
 
- /*
- * 1. Read libraries.
- * 2. Check if libraries interact with global namespace (warn / throw).
- * 3.
- */
-'use strict';
+/* Jshint directives below */
+/*global module:true */
+/*global require:true */
+
+"use strict";
 var _ = require('underscore');
+var beautify = require('js-beautify').js_beautify;
 
 var quoteWrap = function (dep) {
   // Wrap dependency in quotes.
   return "'" + dep + "'";
 };
 
+var VALID_EXPORT_STRATEGIES = ['window', 'context', 'node', 'value'];
+var VALID_PROVIDERS = ['service', 'factory'];
+var DEFAULT_PROVIDER = 'factory';
+
+function isValidExportStrategy (strategy) {
+  return VALID_EXPORT_STRATEGIES.indexOf(strategy) > -1;
+}
+
+function isValidProvider (provider) {
+  return VALID_PROVIDERS.indexOf(provider) > -1;
+}
+
+
 // Template that wraps JavaScript in angular factory definition.
 //
-// @param defineModule Boolean Whether to define a new module when creating
-//    the service.
-// @param dependencies Array An array of dppendencies injected
-//    into the context of the library.
-// @param choose String For libraries that export more than a single
-//    property on their execution contexts, use this argument to
-//    indicate which of the exported properties should be chosen
-//    as the return value for the service.
+// @param exportStrategy {String} There are many ways in which a JavaScript can
+//   expose its API. By default, grunt-angular-service tries to make an educated
+//   guess as to how the target library does so. If the default strategy
+// @param defineModule {Boolean} Whether to define a new module when creating
+//   the service.
+// @param modDeps {Array} A list of dependencies to be passed as the second
+//   argument to the module definition. `defineModule` must be set to `true`
+//   for this to take effect.
+// @param deps {Array} A list of dependencies that will be made available to
+//   the target library as properties on `this`.
+// @param choose {String} If `exportStrategy` is 'this', then
 //
-var makeTemplate = function(defineModule, dependencies, choose) {
+var makeTemplate = function(exportStrategy, defineModule, modDeps, deps, choose) {
 
-  var deps = dependencies || [];
-  var defineStr = defineModule ? ', [' + deps.map(quoteWrap).join(', ') + ']' : '';
+  var defineStr = defineModule ? ', [' + modDeps.map(quoteWrap).join(', ') + ']' : '';
   var srvcStr = deps.length ? deps.map(quoteWrap).join(', ') + ', ' : '';
+
+  // Create the content for the service provider function. This is the code passed to
+  // one of angular's provider methods ('service', 'factory', etc). Each exportStrategy
+  // will set a different value for this body.
+  var funcBody = "";
+
+  if (exportStrategy === 'window') {
+    funcBody +=
+      "   var window = {};" +
+      "   var injected = {};";
+
+      // Loop through each dependency, and assign it as a property on the
+    // context that the target library will execute in.
+    deps.forEach(function(dep){
+      funcBody +=
+        " window['" + dep + "'] = " + dep + ";" +
+        " injected['" + dep + "'] = true;";
+    });
+
+    funcBody +=
+      "   <%= targetLibrarySourceCode %>";
+
+    if (choose) {
+      funcBody +=
+        " return window['" + choose + "']; ";
+    } else {
+      // Check if the target library only exported a single value onto window.
+      // If so, return that single value, otherwise return the entire mock
+      // window object.
+      funcBody +=
+        " var propsAddedByTargetLib = [];" +
+        " angular.forEach(window, function (val, prop) { " +
+        "   if (angular.isUndefined(injected[prop])) { " +
+        "     propsAddedByTargetLib.push(val); " +
+        "   }" +
+        " });" +
+        " if (propsAddedByTargetLib.length === 1) {" +
+        "   return propsAddedByTargetLib.pop();" +
+        " } else { " +
+        "   return window;" +
+        " } ";
+    }
+  } // "window" exportStrategy
+
+  // Export Strategy #1: `this`
+  if (exportStrategy === 'context') {
+    funcBody +=
+      "   var temp = function() {" +
+      "     <%= targetLibrarySourceCode %>" +
+      "   };" +
+      "   var context = {}; " + // Create the context we call our temporary function with.
+      "   var injected = {}; "; // Keep track of dependencies injected into `context`.
+
+    // Loop through each dependency, and assign it as a property on the
+    // context that the target library will execute in.
+    deps.forEach(function(dep){
+      funcBody +=
+        " context['" + dep + "'] = " + dep + ";" +
+        " injected['" + dep + "'] = true;";
+    });
+
+    funcBody +=
+      "   temp.call(context);";
+
+    if (choose) {
+      funcBody +=
+        " return context['" + choose + "']; ";
+    } else {
+      // Check if the target library only exported a single value onto context.
+      // If so, return that single value, otherwise return the entire context
+      // object.
+      funcBody +=
+        " var propsAddedByTargetLib = [];" +
+        " angular.forEach(context, function (val, prop) { " +
+        "   if (angular.isUndefined(injected[prop])) { " +
+        "     propsAddedByTargetLib.push(val);" +
+        "   }" +
+        " });" +
+        " if (propsAddedByTargetLib.length === 1) {" +
+        "   return propsAddedByTargetLib.pop();" +
+        " } else { " +
+        "   return context;" +
+        " } ";
+    }
+  } // end `context` exportStrategy
+
+  // Export Strategy #2: node
+  if (exportStrategy === 'node') {
+    funcBody +=
+      "   var injected = {};";
+
+    // Loop through each dependency, and assign it as a property on the
+    // inject object to be used by our mock `require()` function.
+    deps.forEach(function(dep){
+      funcBody +=
+        " injected['" + dep + "'] = " + dep + ";";
+    });
+
+    funcBody +=
+      // Mock the require() function for providing dependencies to the target lib.
+      "   var require = function (dependency) { " +
+      "     return injected[dependency]; " +
+      "   }" +
+      // Create a variable that mocks the global `module` provided by node.
+      // Later, we inspect this shadowed object to see if the target library added
+      // properties onto it.
+      "   var module = {exports: {}}, exports = module.exports; " +
+      "   <%= targetLibrarySourceCode %>" +
+      // If module.exports was set to something else, return it.
+      "   if (!angular.isObject(module.exports)) { " +
+      "     return module.exports;" +
+      "   }";
+
+    if (choose) {
+      funcBody +=
+        " return module.exports['" + choose + "']; ";
+    } else {
+      // Check if the target library only exported a single value onto context.
+      // If so, return that single value, otherwise return the entire context
+      // object.
+      funcBody +=
+        " var propsAddedByTargetLib = [];" +
+        " angular.forEach(module.exports, function (val, prop) { " +
+        "   if (angular.isUndefined(injected[prop])) { " +
+        "     propsAddedByTargetLib.push(val);" +
+        "   }" +
+        " });" +
+        " if (propsAddedByTargetLib.length === 1) {" +
+        "   return propsAddedByTargetLib.pop();" +
+        " } else { " +
+        "   return module.exports;" +
+        " } ";
+    }
+  } // end `exports` exportStrategy
+
+  // Export strategy #3: `value`
+  if (exportStrategy === 'value') {
+    funcBody +=
+      "   var returnValue = <%= targetLibrarySourceCode %>;";
+
+    if (choose) {
+      funcBody +=
+        " return returnValue['" + choose + "']; ";
+    } else {
+      funcBody +=
+        " return returnValue;";
+    }
+  } // end `value` exportStrategy
 
   var template =
     "(function(angular) {"+
-    "  var isEmpty = function (obj) { " +
-    "    for (var prop in obj) { " +
-    "      if (obj.hasOwnProperty(prop)) { " +
-    "        return false; " +
-    "      } " +
-    "    } " +
-    "    return true; " +
-    "  }; " +
     "  angular.module('<%= module %>'" + defineStr +  ")" +
-    "    .factory('<%= name %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
-    "      var module = {exports: {}}, exports = module.exports; " +
-    "      var temp = function() {" +
-    "        <%= src %>" +
-    "      };";
-
-  // Above, `src` may have dependencies. Thus, prior to executing `temp`
-  // create an execution context injected with these dependencies.
-  template += " var context = {}; ";
-
-  // Keep track of which dependencies were injected into `context`.
-  template += " var injected = {}; ";
-
-  deps.forEach(function(dep){
-    template += "context['" + dep + "'] = " + dep + ";";
-    template += "injected['" + dep + "'] = true;";
-  });
-
-  template +=
-    "      temp.call(context);" +
-    // Export Strategy #1: Check if only a single property was added onto `context`.
-    "      var addedProps = [];" +
-    "      for (var prop in context) { " +
-    "        if (context.hasOwnProperty(prop) && !injected.hasOwnProperty(prop)) { " +
-    "           addedProps.push(prop);" +
-    "        } " +
-    "      }" +
-    "      if (addedProps.length === 1) {" +
-    "        return context[addedProps.pop()];";
-  if (choose) {
-    template +=
-    "      } else if (context['" + choose + "'] !== undefined) { " +
-    "        return context['" + choose + "']; ";
-  }
-  template +=
-    // Export Strategy #2: Check for node style exports.
-    "      } else if (!isEmpty(exports)) { ";
-  if (choose) {
-    template +=
-    "       if (exports['" + choose + "'] !== undefined) { " +
-    "         return exports['" + choose + "']; " +
-    "       } ";
-  }
-  template +=
-    "       return exports; " +
-    "      } else {" +
-    // `src` added more than a single property into `context`. Make no
-    // assumptions and return the entire `context` object.
-    "        return context;" +
-    "      } " +
+    "    .<%= provider %>('<%= name %>', [" + srvcStr + "function("+ deps.join(', ') +") {" +
+    "      " + funcBody +
     "    }]);" +
-    "  })(window.angular);";
+    "})(window.angular);";
 
   return template;
 };
@@ -126,14 +233,18 @@ module.exports = function(grunt) {
 
       var data = this.data;
 
+      if (!_.has(data, 'exportStrategy')) {
+        fatal('`exportStrategy` setting not provided.');
+      }
+
       // Determine validity of `module` option.
       if (!_.has(data, 'module') || !_.isString(data.module)) {
-        fatal('Invalid `module` option.');
+        fatal('Invalid `module` setting.');
       }
 
       // Determine validity of `name` option.
       if (!_.has(data, 'name') || !_.isString(data.name)) {
-        fatal('Invalid `name` option.');
+        fatal('Invalid `name` setting.');
       }
 
       // Determine validity of `defineModule` option.
@@ -141,17 +252,42 @@ module.exports = function(grunt) {
         fatal('Invalid `defineModule` option.');
       }
 
-      var module = data.module;                       // Name of module.
-      var defineModule = data.defineModule || false;  // Define the module?
-      var dependencies = data.dependencies || [];     // Service dependencies.
-      var name = data.name;                           // Name of service.
+      var exportStrategy = data.exportStrategy;
+      var provider = data.provider || DEFAULT_PROVIDER;   // Type of Angular provider to declare.
+      var module = data.module;                           // Name of module.
+      var defineModule = data.defineModule || false;      // Define the module?
+      var modDeps = data.moduleDependencies || [];        // Service dependencies.
+      var deps = data.inject || [];                       // Service dependencies.
+      var name = data.name;                               // Name of service.
       var choose = data.choose;
+      var pretty = data.pretty || true;
+
+      // If pretty is `true`, set it to default beautifier settings.
+      if (pretty === true) {
+        pretty = {indent_size: 2, indent_char: ' '};
+      }
+
+      if (!isValidExportStrategy(exportStrategy)) {
+        fatal("Invalid export strategy. Must be one of: " + VALID_EXPORT_STRATEGIES.join(', '));
+      }
+
+      if (!isValidProvider(provider)) {
+        fatal("Invalid provider. Must be one of: " + VALID_PROVIDERS.join(', '));
+      }
+
+      if (_.isString(deps)) {
+        deps = [deps];
+      }
+
+      if (_.isString(modDeps)) {
+        modDeps = [modDeps];
+      }
 
       var sources = [];
 
       // Iterate over all specified file groups.
       this.files.forEach(function(f) {
-        var src = f.src.filter(function(filepath) {
+        f.src.filter(function(filepath) {
           // Warn on and remove invalid source files (if nonull was set).
           if (!grunt.file.exists(filepath)) {
             warn('Source file "' + filepath + '" not found.');
@@ -171,14 +307,16 @@ module.exports = function(grunt) {
           fatal('No source files provided.');
         }
 
-        var template = makeTemplate(defineModule, dependencies, choose);
+        var template = makeTemplate(exportStrategy, defineModule, modDeps, deps, choose);
+        var formatter = pretty ? beautify : function(src) { return src; };
 
         // Write the destination file.
-        grunt.file.write(f.dest, _.template(template, {
-          src: sources.join("\n"),
+        grunt.file.write(f.dest, formatter(_.template(template, {
+          provider: provider,
+          targetLibrarySourceCode: sources.join("\n"),
           module: module,
           name: name
-        }));
+        }), pretty));
 
         // Print a success message.
         log('File "' + f.dest + '" created.');
