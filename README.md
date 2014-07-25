@@ -31,13 +31,10 @@ convenience methods (`factory`, `service`, `constant`, `value`),
 thereby creating code you can inject via Angular's dependency
 injection.
 
-The target library that `ngservice` wraps can have dependencies.
-
 
 ### How it Works
   1. You provide `ngservice` a target library. This is the library whose
-  functionality you want to be able to inject using Angular dependency
-  injection.
+  functionality you want to inject using Angular dependency injection.
   2. `Ngservice` executes the target library's code.
   3. Using the `exportStrategy` option you set in your `ngservice`
   grunt task, `ngservice` determines what to return from the `factory`,
