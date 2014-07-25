@@ -2,7 +2,7 @@
 > Convert libraries to Angular services as part of your workflow.
 
 `grunt-angular-service` wraps JavaScript code in calls to one of Angular's various
-provider convenience methods (`factory`, `service`, `constant`, `value`),
+provider methods (`factory`, `service`, `constant`, `value`),
 thereby creating code you can inject via Angular's dependency
 injection.
 
