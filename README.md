@@ -26,8 +26,6 @@ grunt.loadNpmTasks('grunt-angular-service');
 ```
 
 ## The "ngservice" task
-
-### What it does
 `Ngservice` wraps JavaScript code in a call to Angular's various provider
 convenience methods (`factory`, `service`, `constant`, `value`),
 thereby creating code you can inject via Angular's dependency
