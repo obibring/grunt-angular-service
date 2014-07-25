@@ -1,8 +1,10 @@
 # grunt-angular-service
 > Convert libraries to Angular services as part of your workflow.
 
-Use `grunt-angular-service` to wrap non-Angular JS code in Angular service
-definitions as part of your worklflow.
+`grunt-angular-service` wraps JavaScript code in a call to one of Angular's various
+provider convenience methods (`factory`, `service`, `constant`, `value`),
+thereby creating code you can inject via Angular's dependency
+injection.
 
 
 ## Getting Started
@@ -26,10 +28,6 @@ grunt.loadNpmTasks('grunt-angular-service');
 ```
 
 ## The "ngservice" task
-`Ngservice` wraps JavaScript code in a call to one of Angular's various provider
-convenience methods (`factory`, `service`, `constant`, `value`),
-thereby creating code you can inject via Angular's dependency
-injection.
 
 
 ### How it Works
