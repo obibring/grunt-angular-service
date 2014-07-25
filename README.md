@@ -1,8 +1,8 @@
 # grunt-angular-service
 > Convert libraries to Angular services as part of your workflow.
 
-Use `grunt-angular-service` to create Angular services from JavaScript libraries
-as part of your worklflow.
+Use `grunt-angular-service` to wrap non-Angular JS code in Angular service
+definitions as part of your worklflow.
 
 
 ## Getting Started
@@ -27,25 +27,40 @@ grunt.loadNpmTasks('grunt-angular-service');
 
 ## The "ngservice" task
 
+### What it does
+`Ngservice` wraps JavaScript code in a call to Angular's various provider
+convenience methods (`factory`, `service`, `constant`, `value`),
+thereby creating code you can inject via Angular's dependency
+injection.
 
-#### How it works
-Ngservice wraps JavaScript code in a call to Angular's `factory` method, thereby
-creating a service you can request via dependency injection.
+The target library that `ngservice` wraps can have dependencies.
 
-The value returned by the ```factory``` function is determined as follows:
 
-  1. If the library adds a single property onto its execution context (```this```), that
-  value is the service.
+### How it Works
+  1. You provide `ngservice` a target library. This is the library whose
+  functionality you want to be able to inject using Angular dependency
+  injection.
+  2. `Ngservice` executes the target library's code.
+  3. Using the `exportStrategy` option you set in your `ngservice`
+  grunt task, `ngservice` determines what to return from the `factory`,
+  `service`, `constant`, or `value` provider it creates for you.
 
-### Overview
+### Use Cases
+  1. You aren't using a script loader, and want angular style DI for all your
+  non-Angular libraries.
+  2. You have a node library you want to use client side with angular.
+
+There are probably many more use cases. If any come to mind, please share.
+
+## Overview
 In your project's Gruntfile, add a section named `ngservice` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
   ngservice: {
-    name: 'myLibAsService',    // Name of dependency to create
-    module: 'myLibModule',     // Name of Module service belongs to
-    defineModule: true,              // Define the module above?
+    name: 'myLibService',    // First argument passed to angular.factory(), angular.service(), etc.
+    module: 'myLibModule',     // Name of Module the service is being added to.
+    defineModule: true,        // Define a new module?
     files: {
         'my_library_as_angular_service.js': 'my_library.js'
     }
@@ -61,37 +76,42 @@ angular.module('myLibModule', []).factory('myLibAsService', function() {
 });
 ```
 
-### Settings
+## Options
 
-#### name
+### exportStrategy
+Type: `String`
+
+This
+
+### name
 Type: `String`
 
 The name of the service being created.
 
-#### module
+### module
 Type: `String`
 
 The name of the module to which the service is added.
 
-#### defineModule
+### defineModule
 Type: `Boolean` Default Value: ```false```
 
 Whether to define the module.
 
-#### choose
+### choose
 Type: `String`
 
 Declare a specific property to export. Use this if your library exports multiple properties
 and you're only interested in one of them.
 
-#### dependencies
+### dependencies
 Type: ```Array``` Default Value: ```null```
 
 A list of dependencies made available to libraries via ```this```.
 
-### Usage Examples
+## Usage Examples
 
-#### Generate a Angular Service from an Existing JavaScript Library
+### Generate a Angular Service from an Existing JavaScript Library
 In this example, underscore.js is ported to an angular service.
 ```js
 grunt.initConfig({
@@ -105,7 +125,7 @@ grunt.initConfig({
 })
 ```
 
-#### Generate a Service From an Existing JavaScript Library that has Dependencies
+### Generate a Service From an Existing JavaScript Library that has Dependencies
 In this contrived example, underscore.js and Backbone.js are both converted to angular services, with the former provided as a dependency to the latter.
 
 ```js
