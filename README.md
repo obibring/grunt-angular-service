@@ -133,20 +133,21 @@ to do this, `ngservice` must understand how the target library exposes its API.
 
 Continuing that thought, there are many ways a JavaScript might expose its API. It may
 add a property onto `window`. It may add a property onto its context (`this`).
-It may use `amd`. It may use `module.exports`, etc.  By default, `ngservice`
-attempts to make an educated guess about how the target libary exposes its API
-(see below for details). However, the default behavior may not always produce the
-desired result. In these situations, the `exportStrategy` setting can be used to
-force `ngservice` to return a particular value.
+It may use `amd`. It may use `module.exports`. The possibilities are numerous.
+By default, `ngservice` attempts to make an educated guess about how the target
+libary exposes its API (see below for details). However, the default mapping
+may not always produce the desired result. In these situations, the
+`exportStrategy` setting can be used to force `ngservice` to map the target library's
+API to the return value of the service method in a specific way.
 
 #### Export Strategies
 
 ##### `default`
 The default `exportStrategy` is as follows:
-  1. If `choose` was passed and module.exports\[`choose`\] exists, return it.
-  2. If `choose` was passed and the library added the property `this`\[`choose`\], then return `this`\[`choose`\].
-  3. If `choose` was passed, and the library is a JS object containing the `choose` property, return the property.
-  4. If `choose` was passed but checks 1-3 fail, return undefined.
+  1. If the `choose` setting was passed and module.exports\[`choose`\] exists, return it.
+  2. If the `choose` setting was passed and the library added the property `this`\[`choose`\], then return `this`\[`choose`\].
+  3. If the `choose` setting was passed, and the library is a JS object containing the `choose` property, return the property.
+  4. If the `choose` setting was passed but checks 1-3 fail, return undefined.
   5. If the library is a value that is not null nor undefined, return it.
   6. If module.exports was assigned a single property, return that property.
   7. If module.exports was assigned more than a single property, return module.exports.
