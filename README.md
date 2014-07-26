@@ -130,8 +130,8 @@ libraries.
 
 * `default`: The default `exportStrategy` is as follows:
   1. If `choose` was passed and module.exports\[`choose`\] exists, return it.
-  2. If `choose` was passed and context\[`choose`\] exists, return it.
-  3. If `choose` was passed, and returnValue\[`choose`\] exists, return it.
+  2. If `choose` was passed and the library added the property `this`\[`choose`\], then return `this`\[`choose`\].
+  3. If `choose` was passed, and the library is an JS object containing the `choose` property, return the value of the property.
   4. If `choose` was passed but checks 1-3 failed, return undefined.
   5. If returnValue is not null or undefined, return it.
   6. If module.exports has a single property, return the value of that property.
