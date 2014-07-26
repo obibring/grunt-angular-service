@@ -145,7 +145,7 @@ API to the return value of the service method in a specific way.
 ##### `default`
 The default `exportStrategy` is as follows:
   1. If the `choose` setting was passed and `module.exports[choose]` exists, return it.
-  2. If the `choose` setting was passed and the library added the `choose` property on its context (`this`), then return it (`this[choose]`).
+  2. If the `choose` setting was passed and the library added the `choose` property on its context (`this`), then return `this[choose]`.
   3. If the `choose` setting was passed, and the library is a JS object containing the `choose` property, return the property.
   4. If the `choose` setting was passed but checks 1-3 fail, return undefined.
   5. If the library is a value that is not null nor undefined, return it.
