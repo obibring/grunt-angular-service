@@ -153,14 +153,17 @@ The default `exportStrategy` is as follows:
   8. If `this` was assigned a single property, return that property.
   9. If `this` was assigned more than a single property, return `this`.
   10. Return undefined.
+
 ##### `context`
 If the target JS code adds a property onto the context within which it
 executes (its `this` value), then set this value. If the target code adds more
 than one property onto its context, and you only care to retrieve one of them, use
 the `choose` setting.
+
 ##### `value`
 If the target "library" is a value such as an object literal, a string, or
 a number, use this option.
+
 ##### `exports`
 If the target library uses node style `module.exports`, use this option.
 If the target library adds more than one property onto `module.exports` and you only
