@@ -69,12 +69,23 @@ angular.module('myLibModule', []).factory('myLibAsService', function() {
 });
 ```
 
-## Options
+## Settings
 
 ### exportStrategy
-Type: `String`
+> Determines how to map the target code's output to the angular service.
 
-This
+Type: `String` Default: `context` Allowed: `context`, `exports`, `value`
+
+* `context`: If the target JS code adds a property onto the context within which it
+executes (its `this` value), then set this value. If the target code adds more
+than one property onto its context, and you only care to retrieve one of them, use
+the `choose` setting.
+* `value`: If the target "library" is a value such as an object literal, a string, or
+a number, use this option.
+* `exports`: If the target library uses node style `module.exports`, use this option.
+If the target library adds more than one property onto `module.exports` and you only
+care to retrieve one of these properties, use the `choose` option.
+
 
 ### name
 Type: `String`
@@ -87,20 +98,41 @@ Type: `String`
 The name of the module to which the service is added.
 
 ### defineModule
-Type: `Boolean` Default Value: ```false```
+Type: `Boolean` Default Value: `false`
 
 Whether to define the module.
+
+### moduleDependencies
+Type: `Array` Default Value: `None`
+
+A list of module names to pass as dependencies to the newly created module. Only
+applies when *defining* the module (`defineModule` must be set to `true`).
+
+```javascript
+angular.module('myModule', ['dependency1', 'dependency2'].factory(...);
+```
+
+### dependencies
+Type: `Array` Default Value: `None`
+
+A list of dependencies to be injected using Angular dependency injection. The target
+library will have access to each dependency via `this`.
+
+```javascript
+// grunt-angular-service will produce the code below.
+angular.module('myModule').factory(['dep1', 'dep2', function(dep1, dep2){ ... }]);
+
+// In the target library, the dependency can be accessed via `this` like so:
+this.dep1;
+this.dep2;
+```
 
 ### choose
 Type: `String`
 
-Declare a specific property to export. Use this if your library exports multiple properties
-and you're only interested in one of them.
+Declare a specific property to export. Use this if your library exports multiple
+properties and you're only interested in one of them.
 
-### dependencies
-Type: ```Array``` Default Value: ```null```
-
-A list of dependencies made available to libraries via ```this```.
 
 ## Usage Examples
 
