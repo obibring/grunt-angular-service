@@ -71,22 +71,6 @@ angular.module('myLibModule', []).factory('myLibAsService', function() {
 
 ## Settings
 
-### exportStrategy
-> Determines how to map the target code's output to the angular service.
-
-Type: `String` Default: `context` Allowed: `context`, `exports`, `value`
-
-* `context`: If the target JS code adds a property onto the context within which it
-executes (its `this` value), then set this value. If the target code adds more
-than one property onto its context, and you only care to retrieve one of them, use
-the `choose` setting.
-* `value`: If the target "library" is a value such as an object literal, a string, or
-a number, use this option.
-* `exports`: If the target library uses node style `module.exports`, use this option.
-If the target library adds more than one property onto `module.exports` and you only
-care to retrieve one of these properties, use the `choose` option.
-
-
 ### name
 Type: `String`
 
@@ -132,6 +116,38 @@ Type: `String`
 
 Declare a specific property to export. Use this if your library exports multiple
 properties and you're only interested in one of them.
+
+### exportStrategy
+> Determines how to map the target code's output to the angular service.
+
+Type: `String` Default: `default` Allowed: `default`, `context`, `exports`, `value`
+
+There are many ways in which a JavaScript may expose its API. It may add a property
+onto `window`. It may add a property onto `this`. It may use `amd`. It may use
+`module.exports`, etc. By default, `ngservice` attempts to make an educated guess
+as to how the target exposes its API. However, the educated case my not work for all
+libraries.
+
+* `default`: The default `exportStrategy` is as follows:
+  1. If choose was passed and module.exports\[choose\] exists, return it.
+  2. If choose was passed and context\[choose\] exists, return it.
+  3. If choose was passed, and returnValue\[choose\] exists, return it.
+  4. If choose was passed but checks 1-3 failed, return undefined.
+  5. If returnValue is not null or undefined, return it.
+  6. If module.exports has a single property, return the value of that property.
+  7. If module.exports has more than a single property, return module.exports.
+  8. If context has a single property, return the value of the single property.
+  9. If context has more than a single property, return context.
+  10. Return undefined.
+* `context`: If the target JS code adds a property onto the context within which it
+executes (its `this` value), then set this value. If the target code adds more
+than one property onto its context, and you only care to retrieve one of them, use
+the `choose` setting.
+* `value`: If the target "library" is a value such as an object literal, a string, or
+a number, use this option.
+* `exports`: If the target library uses node style `module.exports`, use this option.
+If the target library adds more than one property onto `module.exports` and you only
+care to retrieve one of these properties, use the `choose` option.
 
 
 ## Usage Examples
