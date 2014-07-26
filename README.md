@@ -76,6 +76,11 @@ Type: `String`
 
 The name of the service being created.
 
+### provider
+Type: `String` Default: `factory`, Allowed: `factory`, `service`, `constant`, `value`
+
+The type of service to register with Angular.
+
 ### module
 Type: `String`
 
