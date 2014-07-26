@@ -148,12 +148,12 @@ The default `exportStrategy` is as follows:
   2. If the `choose` setting was passed and the library added the `choose` property on its context (`this`), then return `this[choose]`.
   3. If the `choose` setting was passed, and the library is a JS object the a property named `choose`, return the property.
   4. If the `choose` setting was passed but checks 1-3 fail, return undefined.
-  5. If the library is a value that is not null nor undefined, return it.
-  6. If module.exports was assigned a single property, return that property.
-  7. If module.exports was assigned more than a single property, return module.exports.
+  5. If the library a simple value (`Object`, `String`, `Number`, etc) that is not `null` nor `undefined`, return the value.
+  6. If `module.exports` was assigned a single property, return that property.
+  7. If `module.exports` was assigned more than a single property, return `module.exports`.
   8. If `this` was assigned a single property, return that property.
   9. If `this` was assigned more than a single property, return `this`.
-  10. Return undefined.
+  10. Return `undefined`.
 
 ##### `context`
 If the target JS code adds a property onto the context within which it
