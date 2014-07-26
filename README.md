@@ -118,7 +118,7 @@ Declare a specific property to export. Use this if your library exports multiple
 properties and you're only interested in one of them.
 
 ### exportStrategy
-> Determines how to map the target code's output to the angular service.
+> Determines how to map the target library's output to the angular service.
 
 Type: `String` Default: `default` Allowed: `default`, `context`, `exports`, `value`
 
@@ -129,10 +129,10 @@ as to how the target exposes its API. However, the educated case my not work for
 libraries.
 
 * `default`: The default `exportStrategy` is as follows:
-  1. If choose was passed and module.exports\[choose\] exists, return it.
-  2. If choose was passed and context\[choose\] exists, return it.
-  3. If choose was passed, and returnValue\[choose\] exists, return it.
-  4. If choose was passed but checks 1-3 failed, return undefined.
+  1. If `choose` was passed and module.exports\[`choose`\] exists, return it.
+  2. If `choose` was passed and context\[`choose`\] exists, return it.
+  3. If `choose` was passed, and returnValue\[`choose`\] exists, return it.
+  4. If `choose` was passed but checks 1-3 failed, return undefined.
   5. If returnValue is not null or undefined, return it.
   6. If module.exports has a single property, return the value of that property.
   7. If module.exports has more than a single property, return module.exports.
