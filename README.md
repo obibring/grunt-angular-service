@@ -149,23 +149,25 @@ The default `exportStrategy` is as follows:
   3. If the `choose` setting was passed, and the library is a JS object the a property named `choose`, return the property.
   4. If the `choose` setting was passed but checks 1-3 fail, return undefined.
   5. If the library a simple value (`Object`, `String`, `Number`, etc) that is not `null` nor `undefined`, return the value.
-  6. If `module.exports` was assigned a single property, return that property.
-  7. If `module.exports` was assigned more than a single property, return `module.exports`.
-  8. If `this` was assigned a single property, return that property.
-  9. If `this` was assigned more than a single property, return `this`.
-  10. Return `undefined`.
+  6. If `module.exports` was assigned a value, return that value.
+  7. If `module.exports` was assigned a single property, return that property.
+  8. If `module.exports` was assigned more than a single property, return `module.exports`.
+  9. If `this` was assigned a single property, return that property.
+  10. If `this` was assigned more than a single property, return `this`.
+  11. Return `undefined`.
 
 ##### `context`
-If the target JS code adds a property onto the context within which it
-executes (its `this` value), then set this value. If the target code adds more
-than one property onto its context, and you only care to retrieve one of them, use
-the `choose` setting.
+Use this option when the target library exposes its API by adding properties onto
+its context (onto `this`). If the library adds a single property onto `this`, and
+you're only interested this single property, use the `choose` setting to select
+just that one property as the return value of the provider method.
 
 ##### `value`
-If the target "library" is a value such as an object literal, a string, or
-a number, use this option.
+Use this option when the target library is a simple JS value such as an object
+literal, a string, a number, etc.
 
 ##### `exports`
+Use this option when the target library uses node style
 If the target library uses node style `module.exports`, use this option.
 If the target library adds more than one property onto `module.exports` and you only
 care to retrieve one of these properties, use the `choose` option.
