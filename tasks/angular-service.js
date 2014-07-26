@@ -16,19 +16,21 @@ var quoteWrap = function (dep) {
 
 // Template that wraps JavaScript in angular factory definition.
 //
-// @param defineModule Boolean Whether to define a new module when creating
-//    the service.
-// @param dependencies Array An array of dependencies injected
-//    into the context of the library.
-// @param choose String For libraries that export more than a single
-//    property on their execution contexts, use this argument to
-//    indicate which of the exported properties should be chosen
-//    as the return value for the service.
+// @param exportStrategy {String} There are many ways in which a JavaScript can
+//   expose its API. By default, grunt-angular-service tries to make an educated
+//   guess as to how the target library does so. If the default strategy
+// @param defineModule {Boolean} Whether to define a new module when creating
+//   the service.
+// @param modDeps {Array} A list of dependencies to be passed as the second
+//   argument to the module definition. `defineModule` must be set to `true`
+//   for this to take effect.
+// @param deps {Array} A list of dependencies that will be made available to
+//   the target library as properties on `this`.
+// @param choose {String} If `exportStrategy` is 'context', then
 //
-var makeTemplate = function(exportStrategy, defineModule, dependencies, choose) {
+var makeTemplate = function(exportStrategy, defineModule, modDeps, deps, choose) {
 
-  var deps = dependencies || [];
-  var defineStr = defineModule ? ', [' + deps.map(quoteWrap).join(', ') + ']' : '';
+  var defineStr = defineModule ? ', [' + modDeps.map(quoteWrap).join(', ') + ']' : '';
   var srvcStr = deps.length ? deps.map(quoteWrap).join(', ') + ', ' : '';
 
   var template =
@@ -46,7 +48,8 @@ var makeTemplate = function(exportStrategy, defineModule, dependencies, choose) 
     // Create a variable that shadows the global `module` provided by node.
     // Later, we inspect this shadowed object to see if the target library added
     // properties onto it.
-    "      var module = {exports: {}}, exports = module.exports; " +
+    "      var exportsHash = {};" +
+    "      var module = {exports: exportsHash}, exports = module.exports; " +
     // temp() is a wrapper function inside of which the target library's code
     // will be executed.
     "      var temp = function() {" +
@@ -111,11 +114,12 @@ var makeTemplate = function(exportStrategy, defineModule, dependencies, choose) 
   //  3. If choose was passed, and returnValue[choose] exists, return it.
   //  4. If choose was passed but checks 1-3 failed, return undefined.
   //  5. If returnValue is not null or undefined, return it.
-  //  6. If module.exports has a single property, return the value of that property.
-  //  7. If module.exports has more than a single property, return module.exports.
-  //  8. If context has a single property, return the value of the single property.
-  //  9. If context has more than a single property, return context.
-  //  10. Return undefined.
+  //  6. If `module.exports` was re-assigned, return `module.exports`.
+  //  7. If module.exports has a single property, return the value of that property.
+  //  8. If module.exports has more than a single property, return module.exports.
+  //  9. If context has a single property, return the value of the single property.
+  //  10. If context has more than a single property, return context.
+  //  11. Return undefined.
   if (_.isUndefined(exportStrategy)) {
     if (choose) {
       template +=
@@ -139,17 +143,21 @@ var makeTemplate = function(exportStrategy, defineModule, dependencies, choose) 
         " if (!angular.isUndefined(returnValue) && returnValue !== null) {" +
         "   return returnValue;" +
         " }" +
-        " if (!isEmpty(exports)) { " +
+        // Check 6
+        " if (angular.isObject(module.exports) && module.exports !== exportsHash) {" +
+        "   return module.exports; " +
+        " }" +
+        " if (angular.isObject(module.exports) && !isEmpty(module.exports)) { " +
         "   var exportProps = [];" +
-        "   angular.forEach(exports, function (prop, value) {" +
+        "   angular.forEach(module.exports, function (prop, value) {" +
         "     exportProps.push(prop);" +
         "   });"+
-        // Check 6
-        "   if (exportProps.length === 1) {" +
-        "     return exports[exportProps.pop()];" +
-        "   }" +
         // Check 7
-        "   return exports;" +
+        "   if (exportProps.length === 1) {" +
+        "     return module.exports[exportProps.pop()];" +
+        "   }" +
+        // Check 8
+        "   return module.exports;" +
         " }" +
         // Remove all dependencies from `context` that were injected into it earlier.
         " angular.forEach(injected, function (dependency, junk) {" +
@@ -160,14 +168,14 @@ var makeTemplate = function(exportStrategy, defineModule, dependencies, choose) 
         "   angular.forEach(context, function (prop, value) {" +
         "     contextProps.push(prop);" +
         "   });"+
-        // Check 8
+        // Check 9
         "   if (contextProps.length === 1) {" +
         "     return context[contextProps.pop()];" +
         "   }" +
-        // Check 9
+        // Check 10
         "   return context;" +
         " }"+
-        // Check 10
+        // Check 11
         " return undefined;";
     }
   }
@@ -217,11 +225,12 @@ module.exports = function(grunt) {
       }
 
       var exportStrategy = data.exportStrategy || undefined;
-      var providerType = data.provider || 'factory';      // Type of Angular provider to declare.
-      var module = data.module;                       // Name of module.
-      var defineModule = data.defineModule || false;  // Define the module?
-      var dependencies = data.dependencies || [];     // Service dependencies.
-      var name = data.name;                           // Name of service.
+      var providerType = data.provider || 'factory';       // Type of Angular provider to declare.
+      var module = data.module;                            // Name of module.
+      var defineModule = data.defineModule || false;       // Define the module?
+      var modDeps = data.moduleDependencies || []; // Service dependencies.
+      var deps = data.dependencies || [];          // Service dependencies.
+      var name = data.name;                                // Name of service.
       var choose = data.choose;
 
       var sources = [];
@@ -248,7 +257,7 @@ module.exports = function(grunt) {
           fatal('No source files provided.');
         }
 
-        var template = makeTemplate(exportStrategy, defineModule, dependencies, choose);
+        var template = makeTemplate(exportStrategy, defineModule, modDeps, deps, choose);
 
         // Write the destination file.
         grunt.file.write(f.dest, _.template(template, {

@@ -7,7 +7,7 @@
     }
     return true;
   };
-  angular.module('testModule', ['dep1', 'dep2']).factory('testService', ['dep1', 'dep2', function(dep1, dep2) {
+  angular.module('testModule', []).factory('testService', ['dep1', 'dep2', function(dep1, dep2) {
     var module = {exports: {}}, exports = module.exports;
     var temp = function() {
       return (function(root){
