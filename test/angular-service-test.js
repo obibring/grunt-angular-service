@@ -1,5 +1,9 @@
 'use strict';
 
+/* Jshint direcives below */
+/*global require:true */
+/*global exports:true */
+
 var grunt = require('grunt');
 
 /*
@@ -26,16 +30,16 @@ function removeWhitespace (str) {
   return str.replace(/\s+/g, '');
 }
 
-exports.angular_modularize = {
+exports.angularModularize = {
   setUp: function(done) {
     // setup here if necessary
     done();
   },
-  default_options: function(test) {
+  defaultOptions: function(test) {
     test.expect(1);
 
-    var actual = grunt.file.read('tmp/default_options');
-    var expected = grunt.file.read('test/expected/default_options.js');
+    var actual = grunt.file.read('tmp/defaultOptions.js');
+    var expected = grunt.file.read('test/expected/defaultOptions.js');
     test.equal(
       removeWhitespace(actual),
       removeWhitespace(expected),
@@ -43,10 +47,10 @@ exports.angular_modularize = {
 
     test.done();
   },
-  with_define: function(test) {
+  withDefine: function(test) {
     test.expect(1);
-    var actual = grunt.file.read('tmp/with_define');
-    var expected = grunt.file.read('test/expected/with_define.js');
+    var actual = grunt.file.read('tmp/withDefine.js');
+    var expected = grunt.file.read('test/expected/withDefine.js');
     test.equal(
       removeWhitespace(actual),
       removeWhitespace(expected),
@@ -55,11 +59,11 @@ exports.angular_modularize = {
     test.done();
 
   },
-  with_choose: function(test) {
+  withChoose: function(test) {
     test.expect(1);
 
-    var actual = grunt.file.read('tmp/with_choose');
-    var expected = grunt.file.read('test/expected/with_choose.js');
+    var actual = grunt.file.read('tmp/withChoose.js');
+    var expected = grunt.file.read('test/expected/withChoose.js');
     test.equal(
       removeWhitespace(actual),
       removeWhitespace(expected),
@@ -68,10 +72,10 @@ exports.angular_modularize = {
     test.done();
 
   },
-  with_dependencies: function(test) {
+  withDependencies: function(test) {
     test.expect(1);
-    var actual = grunt.file.read('tmp/with_dependencies');
-    var expected = grunt.file.read('test/expected/with_dependencies.js');
+    var actual = grunt.file.read('tmp/withDependencies.js');
+    var expected = grunt.file.read('test/expected/withDependencies.js');
     test.equal(
       removeWhitespace(actual),
       removeWhitespace(expected),
@@ -80,10 +84,10 @@ exports.angular_modularize = {
     test.done();
 
   },
-  with_define_and_dependencies: function(test) {
+  withDefineAndDependencies: function(test) {
     test.expect(1);
-    var actual = grunt.file.read('tmp/with_define_and_dependencies');
-    var expected = grunt.file.read('test/expected/with_define_and_dependencies.js');
+    var actual = grunt.file.read('tmp/withDefineAndDependencies.js');
+    var expected = grunt.file.read('test/expected/withDefineAndDependencies.js');
     test.equal(
       removeWhitespace(actual),
       removeWhitespace(expected),

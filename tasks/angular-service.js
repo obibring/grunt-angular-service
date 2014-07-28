@@ -6,12 +6,23 @@
  * Licensed under the MIT license.
  */
 
-'use strict';
+/* Jshint directives below */
+/*global module:true */
+/*global require:true */
+
+"use strict";
 var _ = require('underscore');
 
 var quoteWrap = function (dep) {
   // Wrap dependency in quotes.
   return "'" + dep + "'";
+};
+
+var DEFAULT_EXPORT_STRATEGY = 'defaule'
+var VALID_EXPORT_STRATEGIES = ['context', 'exports', 'value', DEFAULT_EXPORT_STRATEGY];
+
+function isValidExportStrategy (strategy) {
+  return VALID_EXPORT_STRATEGIES.indexOf(strategy) > -1;
 };
 
 // Template that wraps JavaScript in angular factory definition.
@@ -32,6 +43,10 @@ var makeTemplate = function(exportStrategy, defineModule, modDeps, deps, choose)
 
   var defineStr = defineModule ? ', [' + modDeps.map(quoteWrap).join(', ') + ']' : '';
   var srvcStr = deps.length ? deps.map(quoteWrap).join(', ') + ', ' : '';
+
+  if (!isValidExportStrategy(exportStrategy)) {
+    throw new Error("Invalid `exportStrategy` argument.");
+  }
 
   var template =
     "(function(angular) {"+
@@ -108,18 +123,20 @@ var makeTemplate = function(exportStrategy, defineModule, modDeps, deps, choose)
     }
   }
 
-  // The default export strategy:
-  //  1. If choose was passed and module.exports[choose] exists, return it.
-  //  2. If choose was passed and context[choose] exists, return it.
-  //  3. If choose was passed, and returnValue[choose] exists, return it.
-  //  4. If choose was passed but checks 1-3 failed, return undefined.
-  //  5. If returnValue is not null or undefined, return it.
-  //  6. If `module.exports` was re-assigned, return `module.exports`.
-  //  7. If module.exports has a single property, return the value of that property.
-  //  8. If module.exports has more than a single property, return module.exports.
-  //  9. If context has a single property, return the value of the single property.
-  //  10. If context has more than a single property, return context.
-  //  11. Return undefined.
+  /**
+   * The default export strategy:
+   *  1. If choose was passed and module.exports[choose] exists, return it.
+   *  2. If choose was passed and context[choose] exists, return it.
+   *  3. If choose was passed, and returnValue[choose] exists, return it.
+   *  4. If choose was passed but checks 1-3 failed, return undefined.
+   *  5. If returnValue is not null or undefined, return it.
+   *  6. If module.exports was re-assigned, return module.exports.
+   *  7. If module.exports has a single property, return the value of that property.
+   *  8. If module.exports has more than a single property, return module.exports.
+   *  9. If context has a single property, return the value of the single property.
+   *  10. If context has more than a single property, return context.
+   *  11. Return undefined.
+  **/
   if (_.isUndefined(exportStrategy)) {
     if (choose) {
       template +=
@@ -179,6 +196,7 @@ var makeTemplate = function(exportStrategy, defineModule, modDeps, deps, choose)
         " return undefined;";
     }
   }
+
   template +=
     "  }]);" +
     "})(window.angular);";
@@ -224,7 +242,7 @@ module.exports = function(grunt) {
         fatal('Invalid `defineModule` option.');
       }
 
-      var exportStrategy = data.exportStrategy || undefined;
+      var exportStrategy = data.exportStrategy || DEFAULT_EXPORT_STRATEGY;
       var providerType = data.provider || 'factory';       // Type of Angular provider to declare.
       var module = data.module;                            // Name of module.
       var defineModule = data.defineModule || false;       // Define the module?
@@ -237,7 +255,7 @@ module.exports = function(grunt) {
 
       // Iterate over all specified file groups.
       this.files.forEach(function(f) {
-        var targetLibrarySourceCode = f.src.filter(function(filepath) {
+        f.src.filter(function(filepath) {
           // Warn on and remove invalid source files (if nonull was set).
           if (!grunt.file.exists(filepath)) {
             warn('Source file "' + filepath + '" not found.');
@@ -257,7 +275,11 @@ module.exports = function(grunt) {
           fatal('No source files provided.');
         }
 
-        var template = makeTemplate(exportStrategy, defineModule, modDeps, deps, choose);
+        try {
+          var template = makeTemplate(exportStrategy, defineModule, modDeps, deps, choose);
+        } catch (e) {
+          fatal(e.message);
+        }
 
         // Write the destination file.
         grunt.file.write(f.dest, _.template(template, {

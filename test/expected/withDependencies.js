@@ -7,8 +7,9 @@
     }
     return true;
   };
-  angular.module('testModule', []).factory('testService', ['dep1', 'dep2', function(dep1, dep2) {
-    var module = {exports: {}}, exports = module.exports;
+  angular.module('testModule').factory('testService', ['dep1', 'dep2', function(dep1, dep2) {
+    var exportsHash = {};
+    var module = {exports: exportsHash}, exports = module.exports;
     var temp = function() {
       return (function(root){
         root.myExportedLib = function(){ return 'hello world'; };
@@ -24,15 +25,18 @@
     if (!angular.isUndefined(returnValue) && returnValue !== null) {
       return returnValue;
     }
-    if (!isEmpty(exports)) {
+    if (angular.isObject(module.exports) && module.exports !== exportsHash) {
+      return module.exports;
+    }
+    if (angular.isObject(module.exports) && !isEmpty(module.exports)) {
       var exportProps = [];
-      angular.forEach(exports, function (prop, value) {
+      angular.forEach(module.exports, function (prop, value) {
         exportProps.push(prop);
       });
       if (exportProps.length === 1) {
-        return exports[exportProps.pop()];
+        return module.exports[exportProps.pop()];
       }
-      return exports;
+      return module.exports;
     }
     angular.forEach(injected, function (dependency, junk) {
       delete context[dependency];

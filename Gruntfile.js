@@ -6,24 +6,38 @@
  * Licensed under the MIT license.
  */
 
-'use strict';
+/* Jshint directives below */
+/*global module:true */
+
+"use strict";
 
 module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
     jshint: {
+      options: {
+        camelcase: true,
+        curly: true,
+        eqeqeq: true,
+        freeze: true,
+        globalstrict: true,
+        latedef: true,
+        newcap: true,
+        noarg: true,
+        noempty: true,
+        nonew: true,
+        undef: true,
+        unused: true,
+      },
       all: [
         'Gruntfile.js',
         'tasks/*.js',
-        '<%= nodeunit.tests %>',
+        '<%= nodeunit.tests %>'
       ],
       test: [
-        'tmp/**/*.js'
-      ],
-      options: {
-        jshintrc: '.jshintrc',
-      },
+        'test/angular-service-test.js'
+      ]
     },
 
     // Before generating any new files, remove any previously-created files.
@@ -33,44 +47,44 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     ngservice: {
-      default_options: {
+      defaultOptions: {
         module: 'testModule',
         name: 'testService',
         files: {
-          'tmp/default_options': ['test/fixtures/my-lib.js']
+          'tmp/defaultOptions.js': ['test/fixtures/my-lib.js']
         }
       },
-      with_define: {
+      withDefine: {
         module: 'testModule',
         name: 'testService',
         defineModule: true,
         files: {
-          'tmp/with_define': ['test/fixtures/my-lib.js']
+          'tmp/withDefine.js': ['test/fixtures/my-lib.js']
         }
       },
-      with_choose: {
+      withChoose: {
         module: 'testModule',
         name: 'testService',
         choose: 'chosen',
         files: {
-          'tmp/with_choose': ['test/fixtures/my-lib.js']
+          'tmp/withChoose.js': ['test/fixtures/my-lib.js']
         }
       },
-      with_dependencies: {
+      withDependencies: {
         module: 'testModule',
         name: 'testService',
         dependencies: ['dep1', 'dep2'],
         files: {
-          'tmp/with_dependencies': ['test/fixtures/my-lib.js']
+          'tmp/withDependencies.js': ['test/fixtures/my-lib.js']
         }
       },
-      with_define_and_dependencies: {
+      withDefineAndDependencies: {
         module: 'testModule',
         name: 'testService',
         defineModule: true,
         dependencies: ['dep1', 'dep2'],
         files: {
-          'tmp/with_define_and_dependencies': ['test/fixtures/my-lib.js']
+          'tmp/withDefineAndDependencies.js': ['test/fixtures/my-lib.js']
         }
       }
     },
@@ -81,7 +95,7 @@ module.exports = function(grunt) {
 
     // Unit tests.
     nodeunit: {
-      tests: ['test/*_test.js'],
+      tests: ['test/*-test.js'],
     },
 
   });

@@ -8,7 +8,8 @@
     return true;
   };
   angular.module('testModule').factory('testService', [function() {
-    var module = {exports: {}}, exports = module.exports;
+    var exportsHash = {};
+    var module = {exports: exportsHash}, exports = module.exports;
     var temp = function() {
       return (function(root){
         root.myExportedLib = function(){ return 'hello world'; };
