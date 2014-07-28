@@ -1,8 +1,8 @@
 # grunt-angular-service
 > Convert libraries to Angular services as part of your workflow.
 
-`grunt-angular-service` wraps JavaScript code in calls to one of Angular's various
-provider methods (`factory`, `service`, `constant`, `value`),
+`grunt-angular-service` wraps JavaScript code in calls to either
+`angular.module().service()`, or `angular.module().factory`,
 thereby creating code you can inject via Angular's dependency
 injection.
 
@@ -31,17 +31,20 @@ grunt.loadNpmTasks('grunt-angular-service');
 
 
 ### How it Works
-  1. You provide `ngservice` a target library. This is the library whose
-  functionality you want to inject using Angular dependency injection.
-  2. `Ngservice` executes the target library's code.
-  3. Using the `exportStrategy` option you set in your `ngservice`
-  grunt task, `ngservice` determines what to return from the `factory`,
-  `service`, `constant`, or `value` provider it creates for you.
+  1. You provide `ngservice` a target library. This is the library to be wrapped
+  by either `service()` or `factory()`.
+  2. `Ngservice` creates a file containing your target library's code, plus a call to
+  `angular.module().service()` or `angular.module().factory()`.
+  3. When the file from step 2 is run, the target library's API is returned as the
+  newly created service based on the `exportStrategy` setting you provide in the `ngservice`
+  grunt task configuration.
+
 
 ### Use Cases
   1. You aren't using a script loader, and want angular style DI for all your
   non-Angular libraries.
   2. You have a node library you want to use client side with angular.
+  3. You want to be able to mock non-Angular dependencies in an Angular way.
 
 There are probably many more use cases. If any come to mind, please share.
 
@@ -51,7 +54,8 @@ In your project's Gruntfile, add a section named `ngservice` to the data object 
 ```js
 grunt.initConfig({
   ngservice: {
-    name: 'myLibService',    // First argument passed to angular.factory(), angular.service(), etc.
+    exportStrategy: 'window',  // How the target library exposes its API.
+    name: 'myLibService',      // First argument passed to angular.factory(), angular.service(), etc.
     module: 'myLibModule',     // Name of Module the service is being added to.
     defineModule: true,        // Define a new module?
     files: {
@@ -66,121 +70,101 @@ Will produce the file `my_library_as_angular_service.js`:
 ```js
 angular.module('myLibModule', []).factory('myLibAsService', function() {
   // Your library here.
+  // Your library's API returned here.
 });
 ```
 
 ## Settings
 
 ### name
-Type: `String`
+Type: `String`, Required
 
 The name of the service being created.
 
+### module
+Type: `String`, Required
+
+The name of the module to which the service is added. If creating a new module, set
+`defineModule` to `true`.
+
+### exportStrategy
+> Informs `ngservice` how the target library exposes its API.
+
+Type: `String` Required, Values: `window`, `context`, `node`
+
+ * `window`: Target library sets API on window, ie: `window.someAttr = ...`
+ * `context`: Target library sets API on `this`, ie: `this.someAttr = ...`
+ * `node`: Target library sets API on `module.exports`, ie: `module.exports = ...`
+
+For more detailed information, see [here](#export-strategies).
+
+### inject
+Type: `Array` or `String`
+
+A list of dependencies injected into the provider function and
+made available to the target library. This is needed if the target library depends
+on other libraries that have also been converted to angular services using `ngservice`.
+
+```javascript
+// Below, dep1 and dep2 and injected.
+angular.module('myModule').factory(['dep1', 'dep2', function(dep1, dep2){ ... }]);
+
+  // If exportStrategy is window:
+  window.dep1 = dep1;
+  window.dep2 = dep2;
+
+  // If exportStrtagey is context:
+  this.dep1 = dep1;
+  this.dep2 = dep2;
+
+  // If exportStrategy is node:
+  var require = function (dependency) {
+    if (dependency === 'dep1') return dep1;
+    if (dependency === 'dep2') return dep2;
+  };
+
+  // Target library source code goes here.
+
+  // Target library API returned here.
+```
+
+### moduleDependencies
+Type: `Array` or `String` Default Value: `None`
+
+If the `inject` setting references dependencies from other modules, use this setting
+to declare those other modules. *This setting only applies when `defineModule`
+is set to `true`*.
+
+```javascript
+// The second argument to the module() method are the moduleDependencies.
+angular.module('myModule', ['dependency1', 'dependency2'].factory(...);
+```
+
 ### provider
-Type: `String` Default: `factory`, Allowed: `factory`, `service`, `constant`, `value`
+Type: `String` Default: `factory`, Values: `factory`, `service`
 
 The type of service to register with Angular.
-
-### module
-Type: `String`
-
-The name of the module to which the service is added.
 
 ### defineModule
 Type: `Boolean` Default Value: `false`
 
 Whether to define the module.
 
-### moduleDependencies
-Type: `Array` Default Value: `None`
-
-A list of module names to pass as dependencies to the newly created module. Only
-applies when *defining* the module (`defineModule` must be set to `true`).
-
-```javascript
-angular.module('myModule', ['dependency1', 'dependency2'].factory(...);
-```
-
-### dependencies
-Type: `Array` Default Value: `None`
-
-A list of dependencies to be injected using Angular dependency injection. The target
-library will have access to each dependency via `this`.
-
-```javascript
-// grunt-angular-service will produce the code below.
-angular.module('myModule').factory(['dep1', 'dep2', function(dep1, dep2){ ... }]);
-
-// In the target library, the dependency can be accessed via `this` like so:
-this.dep1;
-this.dep2;
-```
-
 ### choose
 Type: `String`
 
-Declare a specific property to export. Use this if your library exports multiple
-properties and you're only interested in one of them.
-
-### exportStrategy
-> Determines how to map the target library's output to the angular service.
-
-Type: `String` Default: `default` Allowed: `default`, `context`, `exports`, `value`
-
-At its core, `ngservice` takes a target library, and maps that library's API to
-the return value of an Angular service method (`factory`, `service`, etc). In order
-to do this, `ngservice` must understand how the target library exposes its API.
-
-Continuing that thought, there are many ways a JavaScript might expose its API. It may
-add a property onto `window`. It may add a property onto its context (`this`).
-It may use `amd`. It may use `module.exports`. The possibilities are numerous.
-By default, `ngservice` attempts to make an educated guess about how the target
-libary exposes its API (see below for details). However, the default mapping
-may not always produce the desired result. In these situations, the
-`exportStrategy` setting can be used to force `ngservice` to map the target library's
-API to the return value of the service method in a specific way.
-
-#### Export Strategies
-
-##### `default`
-The default `exportStrategy` is as follows:
-  1. If the `choose` setting was passed and `module.exports[choose]` exists, return it.
-  2. If the `choose` setting was passed and the library added the `choose` property on its context (`this`), then return `this[choose]`.
-  3. If the `choose` setting was passed, and the library is a JS object the a property named `choose`, return the property.
-  4. If the `choose` setting was passed but checks 1-3 fail, return undefined.
-  5. If the library a simple value (`Object`, `String`, `Number`, etc) that is not `null` nor `undefined`, return the value.
-  6. If `module.exports` was assigned a value, return that value.
-  7. If `module.exports` was assigned a single property, return that property.
-  8. If `module.exports` was assigned more than a single property, return `module.exports`.
-  9. If `this` was assigned a single property, return that property.
-  10. If `this` was assigned more than a single property, return `this`.
-  11. Return `undefined`.
-
-##### `context`
-Use this option when the target library exposes its API by adding properties onto
-its context (onto `this`). If the library adds a single property onto `this`, and
-you're only interested this single property, use the `choose` setting to select
-just that one property as the return value of the provider method.
-
-##### `value`
-Use this option when the target library is a simple JS value such as an object
-literal, a string, a number, etc.
-
-##### `exports`
-Use this option when the target library uses node style
-If the target library uses node style `module.exports`, use this option.
-If the target library adds more than one property onto `module.exports` and you only
-care to retrieve one of these properties, use the `choose` option.
+Declare the name of a specific property to be used as the return value of the provider
+function. Use this when you're only interested in exporting a portion of the
+target library's API.
 
 
 ## Usage Examples
 
-### Generate a Angular Service from an Existing JavaScript Library
-In this example, underscore.js is ported to an angular service.
+### Convert underscore.js to angular service
 ```js
 grunt.initConfig({
   ngservice: {
-    module: "myModule",
+    module: "somePreExistingModule",  // If this module doesn't exist, set defineModule: true
     name: "_",
     files: {
       'services/underscore_service.js': 'path/to/underscore.js',
@@ -189,7 +173,7 @@ grunt.initConfig({
 })
 ```
 
-### Generate a Service From an Existing JavaScript Library that has Dependencies
+### Convery Backbone.js to angular service (with underscore dependency)
 In this contrived example, underscore.js and Backbone.js are both converted to angular services, with the former provided as a dependency to the latter.
 
 ```js
@@ -197,15 +181,18 @@ grunt.initConfig({
   ngservice: {
     underscore: {
       name: '_',
-      module: 'myModule',
+      module: 'ngUnderscore',
+      defineModule: true,
       files: {
         'services/underscore_service.js': 'path/to/underscore.js',
       }
     },
     backbone: {
       name: 'Backbone',
-      module: 'myModule',
-      dependencies: ['_'],
+      module: 'ngBackbone',
+      defineModule: true,
+      moduleDependencies: ['ngUnderscore'],
+      inject: ['_'],
       files: {
         'services/backbone_service.js': 'path/to/backbone.js',
       }
@@ -213,6 +200,34 @@ grunt.initConfig({
   }
 })
 ```
+
+#### Export Strategies
+
+At its core, `ngservice` maps a target library's API to
+the return value of `service()` or `factory()` provider function. To return the
+correct value, `ngservice` must understand how the target library exports its API.
+
+##### `'window'`
+Use this option when the target library exposes its API by adding a property onto
+`window`. *When this option is selected, references to `window` from within the
+target library will point to a mock `window` object, not the browser's native `window`
+object* (to prevent global namespace littering). Any dependencies listed in the
+`inject` setting will be added onto the mock `window` object and hence made
+available to the target library via `window[dependencyName]`.
+
+##### `'context'`
+Use this option when the target library exposes its API by adding properties onto
+its context (onto `this`). If the library adds a multiple properties onto `this`, and
+you're only interested one of them, use the `choose` setting to select
+just the one property as the return value of the provider method.
+
+##### `'node'`
+Use this option when the target library uses node style
+If the target library uses node style `module.exports`, use this option.
+If the target library adds more than one property onto `module.exports` and you only
+care to retrieve one of these properties, use the `choose` option.
+
+
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).

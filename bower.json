@@ -1,0 +1,30 @@
+{
+  "name": "grunt-angular-service",
+  "version": "0.5.0",
+  "homepage": "https://github.com/obibring/grunt-angular-service",
+  "authors": [
+    "Orr Bibring <orr@crowdtwist.com>"
+  ],
+  "description": "Generate AngularJS services from JavaScript libraries.",
+  "main": "tasks/angular-service.js",
+  "keywords": [
+    "grunt",
+    "angular",
+    "service",
+    "services"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test/lib",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.21",
+    "angular-mocks": "~1.2.21"
+  }
+}
