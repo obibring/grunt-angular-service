@@ -187,8 +187,8 @@ grunt.initConfig({
       name: 'Backbone',
       module: 'ngBackbone',
       defineModule: true,
-      moduleDependencies: ['ngUnderscore'],
-      inject: ['_'],
+      moduleDependencies: ['<%= ngservice.underscore.module %>'],
+      inject: ['<%= ngservice.underscore.name %>'],
       files: {
         'services/backbone_service.js': 'path/to/backbone.js',
       }
