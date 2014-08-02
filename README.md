@@ -1,9 +1,10 @@
-![Build Status](https://travis-ci.org/obibring/grunt-angular-service.svg)
-![Dependency Status](https://david-dm.org/obibring/grunt-angular-service.png)
-![devDependency Status](https://david-dm.org/obibring/grunt-angular-service/dev-status.png)
-
 # grunt-angular-service
 > Convert libraries to Angular services as part of your workflow.
+
+[![Build Status](https://travis-ci.org/obibring/grunt-angular-service.svg)](https://travis-ci.org/obibring/grunt-angular-service)
+[![Dependency Status](https://david-dm.org/obibring/grunt-angular-service.png)](https://david-dm.org/obibring/grunt-angular-service)
+[![devDependency Status](https://david-dm.org/obibring/grunt-angular-service/dev-status.png)](https://david-dm.org/obibring/grunt-angular-service/dev-status)
+
 
 `grunt-angular-service` wraps JavaScript code in calls to either
 `angular.module().service()`, or `angular.module().factory`,
