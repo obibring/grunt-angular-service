@@ -1,4 +1,6 @@
 ![Build Status](https://travis-ci.org/obibring/grunt-angular-service.svg)
+![Dependency Status](https://david-dm.org/obibring/grunt-angular-service.png)
+![devDependency Status](https://david-dm.org/obibring/grunt-angular-service/dev-status.png)
 
 # grunt-angular-service
 > Convert libraries to Angular services as part of your workflow.
