@@ -169,7 +169,7 @@ grunt.initConfig({
 })
 ```
 
-### Convery Backbone.js to angular service (with underscore dependency)
+### Convert Backbone.js to angular service (with underscore dependency)
 In this contrived example, underscore.js and Backbone.js are both converted to angular services, with the former provided as a dependency to the latter.
 
 ```js
