@@ -233,8 +233,15 @@ Add unit tests for any new or changed functionality.
 _(Nothing yet)_
 
 ## Development
-`npm install`
-`npm test`
+Install NPM dependencies.
+```bash
+npm install
+```
+
+Run Tests
+```bash
+npm test
+```
 
 ## License
 The MIT License
