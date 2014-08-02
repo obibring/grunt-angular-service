@@ -3,23 +3,10 @@
 [![Dependency Status](https://david-dm.org/obibring/grunt-angular-service.png)](https://david-dm.org/obibring/grunt-angular-service)
 [![devDependency Status](https://david-dm.org/obibring/grunt-angular-service/dev-status.png)](https://david-dm.org/obibring/grunt-angular-service/dev-status)
 
-Convert libraries to Angular services as part of your workflow.
-
-`grunt-angular-service` wraps JavaScript code in calls to either
-`angular.module().service()`, or `angular.module().factory`,
-thereby creating code you can inject via Angular's dependency
-injection.
+A grunt task for generating Angular services from existing libraries.
 
 
-## Getting Started
-This plugin requires Grunt `~0.4.1`
-
-If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out
-the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how
-to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use
-Grunt plugins. Once you're familiar with that process, you may install this plugin
-with this command:
-
+## Installation
 ```shell
 npm install grunt-angular-service --save-dev
 ```
@@ -32,6 +19,10 @@ grunt.loadNpmTasks('grunt-angular-service');
 ```
 
 ## The "ngservice" task
+`grunt-angular-service` wraps JavaScript code in calls to either
+`angular.module().service()`, or `angular.module().factory()`,
+thereby creating code you can inject via Angular's dependency
+injection.
 
 
 ### How it Works
@@ -53,7 +44,8 @@ grunt.loadNpmTasks('grunt-angular-service');
 There are probably many more use cases. If any come to mind, please share.
 
 ## Overview
-In your project's Gruntfile, add a section named `ngservice` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `ngservice` to the data object passed into
+`grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
@@ -69,7 +61,7 @@ grunt.initConfig({
 })
 ```
 
-Will produce the file `my_library_as_angular_service.js`:
+The above configuration will produce the file `my_library_as_angular_service.js`:
 
 ```js
 angular.module('myLibModule', []).factory('myLibAsService', function() {
@@ -240,7 +232,7 @@ Add unit tests for any new or changed functionality.
 ## Release History
 _(Nothing yet)_
 
-## Testing
+## Development
 `npm install`
 `npm test`
 
