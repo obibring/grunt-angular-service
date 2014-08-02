@@ -25,7 +25,7 @@ thereby creating services you can inject via Angular's dependency
 injection.
 
 
-### How it Works
+#### How it Works
   1. You provide `ngservice` a target library. This is the library to be wrapped
   by either `service()` or `factory()`.
   2. `Ngservice` creates a file containing your target library's code, wrapped by a call to
@@ -35,7 +35,7 @@ injection.
   grunt task configuration.
 
 
-### Use Cases
+#### Use Cases
   1. You aren't using a script loader, and want angular style DI for all your
   non-Angular libraries.
   2. You have a node library you want to use client side with angular.
