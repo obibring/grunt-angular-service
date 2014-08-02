@@ -146,6 +146,11 @@ Type: `Boolean` Default Value: `false`
 
 Whether to define the module.
 
+### pretty
+Type: `Boolean` or `Object` | Default: `{indent_size: 2, indent_char: ' '}`
+
+A configuration object passed to [js-beautify](https://github.com/beautify-web/js-beautify).
+
 ### choose
 Type: `String`
 
