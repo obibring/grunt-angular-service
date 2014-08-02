@@ -28,8 +28,8 @@ injection.
 ### How it Works
   1. You provide `ngservice` a target library. This is the library to be wrapped
   by either `service()` or `factory()`.
-  2. `Ngservice` creates a file containing your target library's code, plus a call to
-  `angular.module().service()` or `angular.module().factory()`.
+  2. `Ngservice` creates a file containing your target library's code, wrapped by a call to
+  either `angular.module().service()` or `angular.module().factory()`.
   3. When the file from step 2 is run, the target library's API is returned as the
   newly created service based on the `exportStrategy` setting you provide in the `ngservice`
   grunt task configuration.
