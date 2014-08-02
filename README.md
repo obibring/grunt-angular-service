@@ -50,14 +50,16 @@ In your project's Gruntfile, add a section named `ngservice` to the data object 
 ```js
 grunt.initConfig({
   ngservice: {
-    exportStrategy: 'window',  // How the target library exposes its API.
-    name: 'myLibService',      // First argument passed to angular.factory(), angular.service(), etc.
-    module: 'myLibModule',     // Name of Module the service is being added to.
-    defineModule: true,        // Define a new module?
-    files: {
-        'my_library_as_angular_service.js': 'my_library.js'
+    convertMyLibToService: {
+      exportStrategy: 'window',  // How the target library exposes its API.
+      name: 'myLibService',      // First argument passed to angular.factory(), angular.service(), etc.
+      module: 'myLibModule',     // Name of Module the service is being added to.
+      defineModule: true,        // Define a new module?
+      files: {
+          'my_library_as_angular_service.js': 'my_library.js'
+      }
     }
-  },
+  }
 })
 ```
 
@@ -165,12 +167,14 @@ target library's API.
 ```js
 grunt.initConfig({
   ngservice: {
-    module: "somePreExistingModule",  // If this module doesn't exist, set defineModule: true
-    name: "_",
-    files: {
-      'services/underscore_service.js': 'path/to/underscore.js',
-    },
-  },
+    underscore: {
+      module: "somePreExistingModule",  // If this module doesn't exist, set defineModule: true
+      name: "_",
+      files: {
+        'services/underscore_service.js': 'path/to/underscore.js',
+      }
+    }
+  }
 })
 ```
 
