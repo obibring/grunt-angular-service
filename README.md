@@ -230,10 +230,15 @@ care to retrieve one of these properties, use the `choose` option.
 
 
 ## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
+In lieu of a formal styleguide, take care to maintain the existing coding style.
+Add unit tests for any new or changed functionality.
 
 ## Release History
 _(Nothing yet)_
+
+## Testing
+`npm install`
+`npm test`
 
 ## License
 The MIT License
