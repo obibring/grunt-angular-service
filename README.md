@@ -51,9 +51,9 @@ In your project's Gruntfile, add a section named `ngservice` to the data object 
 grunt.initConfig({
   ngservice: {
     convertMyLibToService: {
-      exportStrategy: 'window',  // How the target library exposes its API.
       name: 'myLibService',      // First argument passed to angular.factory(), angular.service(), etc.
       module: 'myLibModule',     // Name of Module the service is being added to.
+      exportStrategy: 'window',  // How the target library exposes its API.
       defineModule: true,        // Define a new module?
       files: {
           'my_library_as_angular_service.js': 'my_library.js'
@@ -170,6 +170,7 @@ grunt.initConfig({
     underscore: {
       module: "somePreExistingModule",  // If this module doesn't exist, set defineModule: true
       name: "_",
+      exportStrategy: 'context',
       files: {
         'services/underscore_service.js': 'path/to/underscore.js',
       }
@@ -187,6 +188,7 @@ grunt.initConfig({
     underscore: {
       name: '_',
       module: 'ngUnderscore',
+      exportStrategy: 'context',
       defineModule: true,
       files: {
         'services/underscore_service.js': 'path/to/underscore.js',
@@ -195,6 +197,7 @@ grunt.initConfig({
     backbone: {
       name: 'Backbone',
       module: 'ngBackbone',
+      exportStrategy: 'context',
       defineModule: true,
       moduleDependencies: ['<%= ngservice.underscore.module %>'],
       inject: ['<%= ngservice.underscore.name %>'],
