@@ -19,7 +19,7 @@ var quoteWrap = function (dep) {
   return "'" + dep + "'";
 };
 
-var VALID_EXPORT_STRATEGIES = ['window', 'context', 'node', 'value'];
+var VALID_EXPORT_STRATEGIES = ['window', 'context', 'node'];
 var VALID_PROVIDERS = ['service', 'factory'];
 var DEFAULT_PROVIDER = 'factory';
 
