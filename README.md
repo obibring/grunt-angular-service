@@ -75,12 +75,12 @@ angular.module('myLibModule', []).factory('myLibAsService', function() {
 ## Settings
 
 ### name
-Type: `String`, Required
+Type: `String` | Required
 
 The name of the service being created.
 
 ### module
-Type: `String`, Required
+Type: `String` | Required
 
 The name of the module to which the service is added. If creating a new module, set
 `defineModule` to `true`.
@@ -88,7 +88,7 @@ The name of the module to which the service is added. If creating a new module, 
 ### exportStrategy
 > Informs `ngservice` how the target library exposes its API.
 
-Type: `String` Required, Values: `window`, `context`, `node`
+Type: `String` | Required | Values: `window`, `context`, `node`
 
  * `window`: Target library sets API on window, ie: `window.someAttr = ...`
  * `context`: Target library sets API on `this`, ie: `this.someAttr = ...`
