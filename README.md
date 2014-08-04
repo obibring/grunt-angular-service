@@ -86,9 +86,9 @@ The name of the module to which the service is added. If creating a new module, 
 `defineModule` to `true`.
 
 ### exportStrategy
-> Informs `ngservice` how the target library exposes its API.
-
 Type: `String` | Required | Values: `window`, `context`, `node`
+
+Informs `ngservice` how the target library exposes its API.
 
  * `window`: Target library sets API on window, ie: `window.someAttr = ...`
  * `context`: Target library sets API on `this`, ie: `this.someAttr = ...`
