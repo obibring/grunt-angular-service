@@ -260,7 +260,7 @@ module.exports = function(grunt) {
       var deps = data.inject || [];                       // Service dependencies.
       var name = data.name;                               // Name of service.
       var choose = data.choose;
-      var pretty = data.pretty || true;
+      var pretty = (data.pretty !== undefined) ? data.pretty : true;
 
       // If pretty is `true`, set it to default beautifier settings.
       if (pretty === true) {
